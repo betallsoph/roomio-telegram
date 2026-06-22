@@ -7,6 +7,6 @@ services:
       # Port 8081 đang dùng cho portal chủ trọ, anh đổi TMA sang 8082
       - "8082:80" 
     environment:
-      # Sử dụng IP Public của VPS thay vì IP Tailscale cũ
-      - API_TARGET=http://140.245.59.215:3000
+      # Sử dụng IP Gateway nội bộ của Docker để gọi thẳng qua Backend (tránh bị Firewall của VPS chặn)
+      - API_TARGET=http://172.17.0.1:3000
     restart: always
