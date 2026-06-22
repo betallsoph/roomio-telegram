@@ -175,8 +175,9 @@
 				pendingMeters[idx].status = 'submitted';
 			}
 			activeMeterId = null;
-		} catch (error) {
-			toast.error('Có lỗi xảy ra khi gửi dữ liệu', { id: 'upload' });
+		} catch (error: any) {
+			console.error('Lỗi chi tiết:', error);
+			toast.error(error.message || 'Có lỗi xảy ra khi gửi dữ liệu', { id: 'upload', duration: 5000 });
 		} finally {
 			isUploading = false;
 		}
