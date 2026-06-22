@@ -7,7 +7,11 @@
   import BackButton from '$lib/BackButton.svelte';
 
   // Initialize the TMA SDK.
-  init();
+  try {
+    init();
+  } catch (e) {
+    console.warn('TMA SDK init failed (likely running outside Telegram):', e);
+  }
 
   let { children } = $props();
 </script>
