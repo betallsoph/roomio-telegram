@@ -126,22 +126,47 @@
 		const meterToSubmit = activeMeter;
 
 		try {
-			// --- QUY TRÌNH HƯỚNG 3 (MOCK) ---
-			
 			// 1. Xin Pre-signed URL từ roomio-api
 			toast.loading('Đang xin quyền Upload...', { id: 'upload' });
-			await new Promise(r => setTimeout(r, 800)); // Giả lập mạng
+			const presignRes = await fetch('/api/uploads/presign', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({
+					purpose: 'meter-reading',
+					contentType: meterToSubmit.compressedBlob.type || 'image/jpeg',
+					byteSize: meterToSubmit.compressedBlob.size
+				})
+			});
+			const presign = await presignRes.json();
+			if (!presignRes.ok) throw new Error(presign.error || 'Không xin được link upload');
 			
 			// 2. Upload thẳng lên Cloudflare R2 bằng PUT
 			toast.loading('Đang up ảnh lên Cloudflare R2...', { id: 'upload' });
-			await new Promise(r => setTimeout(r, 1500)); // Giả lập thời gian up
+			const uploadRes = await fetch(presign.uploadUrl, {
+				method: 'PUT',
+				headers: presign.headers,
+				body: meterToSubmit.compressedBlob
+			});
+			if (!uploadRes.ok) throw new Error('Upload ảnh lên R2 thất bại');
 			
-			// Thực tế code chỗ này sẽ là:
-			// await fetch(presignedUrl, { method: 'PUT', body: meterToSubmit.compressedBlob });
+			const finalPhotoUrl = presign.publicUrl || presign.url;
 
 			// 3. Gửi data chốt số về roomio-api
 			toast.loading('Đang lưu chỉ số...', { id: 'upload' });
-			await new Promise(r => setTimeout(r, 600)); 
+			const meterRes = await fetch('/api/meter-readings', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({
+					roomId: 'room-503', // Tạm hardcode phòng 503 theo UI
+					serviceId: meterToSubmit.id,
+					month: new Date().getMonth() + 1,
+					currValue: Number(meterToSubmit.currValue),
+					photoUrl: finalPhotoUrl
+				})
+			});
+			if (!meterRes.ok) throw new Error('Không lưu được chỉ số');
 			
 			toast.success(`Đã gửi chỉ số ${meterToSubmit.serviceName} thành công!`, { id: 'upload' });
 			
