@@ -31,24 +31,83 @@
 	]);
 
 	let activeMeterId = $state<string | null>(null);
+	let isUploading = $state(false);
 
 	const activeMeter = $derived(pendingMeters.find((m) => m.id === activeMeterId));
 
-	function handlePhotoCapture(event: Event, meterId: string) {
+	// Hàm nén ảnh cực mạnh bằng Canvas
+	async function compressImage(file: File): Promise<Blob> {
+		return new Promise((resolve, reject) => {
+			const reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = (e) => {
+				const img = new Image();
+				img.src = e.target?.result as string;
+				img.onload = () => {
+					const canvas = document.createElement('canvas');
+					// Giới hạn kích thước tối đa 800px để giảm dung lượng kịch trần
+					const MAX_SIZE = 800;
+					let width = img.width;
+					let height = img.height;
+
+					if (width > height && width > MAX_SIZE) {
+						height *= MAX_SIZE / width;
+						width = MAX_SIZE;
+					} else if (height > MAX_SIZE) {
+						width *= MAX_SIZE / height;
+						height = MAX_SIZE;
+					}
+
+					canvas.width = width;
+					canvas.height = height;
+					const ctx = canvas.getContext('2d');
+					if (!ctx) return reject('No canvas context');
+					
+					ctx.drawImage(img, 0, 0, width, height);
+					
+					// Nén thành JPEG với chất lượng 50% (rất nhẹ, phù hợp đọc số)
+					canvas.toBlob(
+						(blob) => {
+							if (blob) resolve(blob);
+							else reject('Canvas to Blob failed');
+						},
+						'image/jpeg',
+						0.5
+					);
+				};
+				img.onerror = (err) => reject(err);
+			};
+			reader.onerror = (err) => reject(err);
+		});
+	}
+
+	async function handlePhotoCapture(event: Event, meterId: string) {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files[0]) {
 			const file = input.files[0];
-			// Mock tạo object URL tạm thời để hiển thị preview
-			const previewUrl = URL.createObjectURL(file);
 			
-			const idx = pendingMeters.findIndex(m => m.id === meterId);
-			if (idx !== -1) {
-				pendingMeters[idx].photoUrl = previewUrl;
+			toast.info('Đang nén ảnh...');
+			try {
+				const compressedBlob = await compressImage(file);
+				console.log(`Dung lượng gốc: ${(file.size/1024).toFixed(1)}KB. Dung lượng nén: ${(compressedBlob.size/1024).toFixed(1)}KB`);
+				
+				const previewUrl = URL.createObjectURL(compressedBlob);
+				
+				const idx = pendingMeters.findIndex(m => m.id === meterId);
+				if (idx !== -1) {
+					pendingMeters[idx].photoUrl = previewUrl;
+					// Lưu lại blob để lúc Gửi thì up cái này
+					(pendingMeters[idx] as any).compressedBlob = compressedBlob;
+				}
+				toast.success(`Nén ảnh siêu nhẹ thành công! (${(compressedBlob.size/1024).toFixed(0)}KB)`);
+			} catch (error) {
+				toast.error('Lỗi khi nén ảnh');
+				console.error(error);
 			}
 		}
 	}
 
-	function handleSubmit() {
+	async function handleSubmit() {
 		if (!activeMeter) return;
 		if (!activeMeter.currValue) {
 			toast.error('Vui lòng nhập số cuối kỳ');
@@ -63,14 +122,39 @@
 			return;
 		}
 
-		// Mock call API
-		toast.success(`Đã gửi chỉ số ${activeMeter.serviceName} thành công!`);
-		
-		const idx = pendingMeters.findIndex(m => m.id === activeMeter.id);
-		if (idx !== -1) {
-			pendingMeters[idx].status = 'submitted';
+		isUploading = true;
+		const meterToSubmit = activeMeter;
+
+		try {
+			// --- QUY TRÌNH HƯỚNG 3 (MOCK) ---
+			
+			// 1. Xin Pre-signed URL từ roomio-api
+			toast.loading('Đang xin quyền Upload...', { id: 'upload' });
+			await new Promise(r => setTimeout(r, 800)); // Giả lập mạng
+			
+			// 2. Upload thẳng lên Cloudflare R2 bằng PUT
+			toast.loading('Đang up ảnh lên Cloudflare R2...', { id: 'upload' });
+			await new Promise(r => setTimeout(r, 1500)); // Giả lập thời gian up
+			
+			// Thực tế code chỗ này sẽ là:
+			// await fetch(presignedUrl, { method: 'PUT', body: meterToSubmit.compressedBlob });
+
+			// 3. Gửi data chốt số về roomio-api
+			toast.loading('Đang lưu chỉ số...', { id: 'upload' });
+			await new Promise(r => setTimeout(r, 600)); 
+			
+			toast.success(`Đã gửi chỉ số ${meterToSubmit.serviceName} thành công!`, { id: 'upload' });
+			
+			const idx = pendingMeters.findIndex(m => m.id === meterToSubmit.id);
+			if (idx !== -1) {
+				pendingMeters[idx].status = 'submitted';
+			}
+			activeMeterId = null;
+		} catch (error) {
+			toast.error('Có lỗi xảy ra khi gửi dữ liệu', { id: 'upload' });
+		} finally {
+			isUploading = false;
 		}
-		activeMeterId = null;
 	}
 </script>
 
@@ -200,9 +284,15 @@
 					<div class="pt-4">
 						<button 
 							onclick={handleSubmit}
-							class="w-full bg-black text-white rounded-xl py-4 font-black text-lg shadow-xl shadow-black/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+							disabled={isUploading}
+							class="w-full {isUploading ? 'bg-zinc-400' : 'bg-black active:scale-[0.98] shadow-xl shadow-black/20'} text-white rounded-xl py-4 font-black text-lg transition-all flex items-center justify-center gap-2"
 						>
-							<UploadCloud class="h-5 w-5" /> Gửi chỉ số
+							{#if isUploading}
+								<div class="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+								Đang xử lý...
+							{:else}
+								<UploadCloud class="h-5 w-5" /> Gửi chỉ số
+							{/if}
 						</button>
 					</div>
 				</div>
