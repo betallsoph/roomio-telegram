@@ -181,6 +181,15 @@
 			isUploading = false;
 		}
 	}
+
+	function handleMeterClick(meter: any) {
+		console.log('Meter clicked:', meter.serviceName, 'Status:', meter.status);
+		if (meter.status === 'pending') {
+			activeMeterId = meter.id;
+			console.log('activeMeterId changed to:', activeMeterId);
+			console.log('activeMeter derived value is now:', activeMeter);
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-gray-50 pb-20">
@@ -196,7 +205,7 @@
 			{#each pendingMeters as meter}
 				<button 
 					class="w-full bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left transition-all active:scale-[0.98] {meter.status === 'submitted' ? 'opacity-70 grayscale-[0.5]' : ''}"
-					onclick={() => meter.status === 'pending' && (activeMeterId = meter.id)}
+					onclick={() => handleMeterClick(meter)}
 					disabled={meter.status === 'submitted'}
 				>
 					<div class="flex items-center justify-between">

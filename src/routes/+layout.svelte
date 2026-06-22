@@ -5,13 +5,16 @@
   import ConfirmPopup from '$lib/ConfirmPopup.svelte';
   import { init } from '@tma.js/sdk-svelte';
   import BackButton from '$lib/BackButton.svelte';
+  import { onMount } from 'svelte';
 
-  // Initialize the TMA SDK.
-  try {
-    init();
-  } catch (e) {
-    console.warn('TMA SDK init failed (likely running outside Telegram):', e);
-  }
+  // Initialize the TMA SDK safely on client side
+  onMount(() => {
+    try {
+      init();
+    } catch (e) {
+      console.warn('TMA SDK init failed (likely running outside Telegram):', e);
+    }
+  });
 
   let { children } = $props();
 </script>
