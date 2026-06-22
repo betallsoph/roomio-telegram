@@ -2,20 +2,10 @@
   import './layout.css';
   import favicon from '$lib/assets/favicon.svg';
   import { Toaster } from 'svelte-sonner';
-  import ConfirmPopup from '$lib/ConfirmPopup.svelte';
-  import { init } from '@tma.js/sdk-svelte';
-  import BackButton from '$lib/BackButton.svelte';
   import { onMount } from 'svelte';
 
-  // Initialize the TMA SDK safely on client side
-  onMount(() => {
-    try {
-      init();
-    } catch (e) {
-      console.warn('TMA SDK init failed (likely running outside Telegram):', e);
-    }
-  });
-
+  // Chú ý: Tạm thời bỏ BackButton và init() của tma.js để tránh sập Svelte hydration
+  // khi chạy ở môi trường ngoài hoặc chưa load kịp.
   let { children } = $props();
 </script>
 
@@ -25,6 +15,4 @@
 </svelte:head>
 
 <Toaster position="top-right" richColors />
-<ConfirmPopup />
-<BackButton />
 {@render children()}
