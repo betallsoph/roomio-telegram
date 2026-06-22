@@ -4,7 +4,9 @@
 
   const isVisible = useSignal(backButton.isVisible);
 
-  $: console.log('The button is', isVisible.value ? 'visible' : 'invisible');
+  $effect(() => {
+    console.log('The button is', isVisible.value ? 'visible' : 'invisible');
+  });
 
   onMount(() => {
     backButton.show();
