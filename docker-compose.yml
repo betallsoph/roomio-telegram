@@ -5,7 +5,7 @@ services:
     container_name: roomio-tma
     ports:
       # Port 8081 đang dùng cho portal chủ trọ, anh đổi TMA sang 8082
-      - "8082:80" 
+      - '8082:80'
     environment:
       # API chạy trên VPS khác qua Tailscale
       - API_TARGET=http://100.102.69.100:3000

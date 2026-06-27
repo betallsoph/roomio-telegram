@@ -9,5 +9,7 @@
 </script>
 
 <div class="flex h-screen items-center justify-center bg-gray-50">
-	<div class="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+	<div
+		class="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"
+	></div>
 </div>

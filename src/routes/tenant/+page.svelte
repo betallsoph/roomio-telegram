@@ -761,18 +761,11 @@
 		class="sticky top-0 z-40 mx-auto flex w-full max-w-4xl shrink-0 items-center justify-between bg-transparent px-5 py-5 text-black sm:px-6"
 	>
 		<div class="flex items-center gap-2">
-			<img
-				src="/brand/roomio-wordmark-blue600.png"
-				alt="Roomio"
-				class="h-auto w-32"
-			/>
+			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="h-auto w-32" />
 			<span class="text-xs font-bold text-zinc-500">Cư Dân</span>
 		</div>
 
-		<button
-			onclick={handleLogout}
-			class="roomio-button-white px-3 py-1.5 text-xs"
-		>
+		<button onclick={handleLogout} class="roomio-button-white px-3 py-1.5 text-xs">
 			Đăng xuất
 			<LogOut class="h-4 w-4" />
 		</button>
@@ -782,9 +775,7 @@
 		<div class="relative z-10 flex flex-1 items-center justify-center">
 			<div class="flex flex-col items-center gap-3">
 				<Loader2 class="h-10 w-10 animate-spin text-black" />
-				<p class="text-xs font-bold text-zinc-500">
-					Đang tải cổng thông tin cư dân...
-				</p>
+				<p class="text-xs font-bold text-zinc-500">Đang tải cổng thông tin cư dân...</p>
 			</div>
 		</div>
 	{:else}
@@ -799,7 +790,9 @@
 				></div>
 
 				<div class="relative z-10 flex items-center gap-4">
-					<div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-black bg-white text-xl font-black text-black shadow-secondary">
+					<div
+						class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-black bg-white text-xl font-black text-black shadow-secondary"
+					>
 						{tenantName.slice(0, 1).toUpperCase()}
 					</div>
 					<div>
@@ -816,9 +809,7 @@
 
 				{#if roomDetails}
 					<div class="relative z-10 shrink-0 text-left sm:text-right">
-						<span class="block text-xs font-bold text-zinc-500"
-							>Giá phòng thuê</span
-						>
+						<span class="block text-xs font-bold text-zinc-500">Giá phòng thuê</span>
 						<span class="text-2xl font-black">{formatCurrency(roomDetails.monthlyRent)}</span>
 					</div>
 				{/if}
@@ -827,9 +818,7 @@
 			<!-- Pinned Announcements -->
 			{#if announcements.length > 0}
 				<div class="space-y-2">
-					<h3
-						class="flex items-center gap-1.5 text-xs font-black text-zinc-500"
-					>
+					<h3 class="flex items-center gap-1.5 text-xs font-black text-zinc-500">
 						<Pin class="h-4 w-4 text-black" />
 						Bảng tin thông báo
 					</h3>
@@ -1077,9 +1066,7 @@
 									<!-- Bank Info and Proof Upload -->
 									<div class="w-full flex-1 space-y-3">
 										<div class="space-y-2 border-b-2 border-black pb-3 text-xs">
-											<p class="font-black text-zinc-500">
-												Thông tin thanh toán
-											</p>
+											<p class="font-black text-zinc-500">Thông tin thanh toán</p>
 											<p class="text-sm font-black text-black">Cổng thanh toán PayOS</p>
 											<p class="font-black text-indigo-600">
 												Số tiền: {formatCurrency(payingInvoice.totalAmount)}
@@ -1090,14 +1077,15 @@
 												Mã hóa đơn: {payingInvoice.id}
 											</p>
 											{#if payingInvoice.payosStatus}
-												<p class="font-bold text-zinc-600">Trạng thái PayOS: {payingInvoice.payosStatus}</p>
+												<p class="font-bold text-zinc-600">
+													Trạng thái PayOS: {payingInvoice.payosStatus}
+												</p>
 											{/if}
 										</div>
 
 										<!-- Upload payment proof image form -->
 										<form onsubmit={handleSubmitProof} class="space-y-3 pt-2">
-											<span
-												class="block text-[10px] font-black text-zinc-500"
+											<span class="block text-[10px] font-black text-zinc-500"
 												>Chụp/tải ảnh Bill chuyển khoản thành công</span
 											>
 											<label
@@ -1225,9 +1213,7 @@
 							<form onsubmit={handleSubmitRequest} class="space-y-4">
 								<div class="grid grid-cols-2 gap-4">
 									<div class="space-y-1">
-										<label
-											for="req-cat"
-											class="block text-xs font-bold text-zinc-600"
+										<label for="req-cat" class="block text-xs font-bold text-zinc-600"
 											>Phân loại kỹ thuật</label
 										>
 										<select
@@ -1243,9 +1229,7 @@
 										</select>
 									</div>
 									<div class="space-y-1">
-										<label
-											for="req-title"
-											class="block text-xs font-bold text-zinc-600"
+										<label for="req-title" class="block text-xs font-bold text-zinc-600"
 											>Tiêu đề sự cố</label
 										>
 										<input
@@ -1260,9 +1244,7 @@
 								</div>
 
 								<div class="space-y-1">
-									<label
-										for="req-desc"
-										class="block text-xs font-bold text-zinc-600"
+									<label for="req-desc" class="block text-xs font-bold text-zinc-600"
 										>Mô tả chi tiết vấn đề</label
 									>
 									<textarea
@@ -1422,9 +1404,7 @@
 								<form onsubmit={handleSubmitMeter} class="space-y-4">
 									<div class="grid grid-cols-2 gap-4">
 										<div class="space-y-1">
-											<label
-												for="tenant-m-serv"
-												class="block text-xs font-bold text-zinc-600"
+											<label for="tenant-m-serv" class="block text-xs font-bold text-zinc-600"
 												>Dịch vụ đo lường</label
 											>
 											<select
@@ -1440,9 +1420,7 @@
 											</select>
 										</div>
 										<div class="space-y-1">
-											<label
-												for="tenant-m-month"
-												class="block text-xs font-bold text-zinc-600"
+											<label for="tenant-m-month" class="block text-xs font-bold text-zinc-600"
 												>Tháng báo số</label
 											>
 											<input
@@ -1457,8 +1435,7 @@
 
 									<div class="grid grid-cols-2 gap-4">
 										<div class="space-y-1">
-											<span class="block text-xs font-bold text-zinc-600"
-												>Chỉ số cũ (Kỳ trước)</span
+											<span class="block text-xs font-bold text-zinc-600">Chỉ số cũ (Kỳ trước)</span
 											>
 											<div
 												class="w-full rounded-lg border-2 border-black bg-zinc-100 px-3 py-2 text-xs font-black text-black"
@@ -1467,9 +1444,7 @@
 											</div>
 										</div>
 										<div class="space-y-1">
-											<label
-												for="tenant-m-curr"
-												class="block text-xs font-bold text-zinc-600"
+											<label for="tenant-m-curr" class="block text-xs font-bold text-zinc-600"
 												>Chỉ số mới (Thực tế)</label
 											>
 											<input
@@ -1548,9 +1523,7 @@
 								<div class="overflow-x-auto bg-white">
 									<table class="w-full border-collapse text-left text-xs">
 										<thead>
-											<tr
-												class="border-b-2 border-black bg-zinc-50 font-black text-zinc-600"
-											>
+											<tr class="border-b-2 border-black bg-zinc-50 font-black text-zinc-600">
 												<th class="px-4 py-3">Tháng</th>
 												<th class="px-4 py-3">Dịch vụ</th>
 												<th class="px-4 py-3">Chỉ số Cũ → Mới</th>
@@ -1618,9 +1591,7 @@
 								<!-- Hợp đồng chính thức đang hiệu lực -->
 								<div class="grid grid-cols-1 gap-4 text-sm font-semibold text-black md:grid-cols-2">
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Ngày bắt đầu
-										</p>
+										<p class="text-xs font-black text-zinc-500">Ngày bắt đầu</p>
 										<p class="mt-1 text-base font-black text-black">
 											{new Date(activeContract.startDate).toLocaleDateString('vi-VN')}
 										</p>
@@ -1630,9 +1601,7 @@
 											? 'bg-red-200'
 											: ''}"
 									>
-										<p class="text-xs font-black text-zinc-500">
-											Ngày kết thúc
-										</p>
+										<p class="text-xs font-black text-zinc-500">Ngày kết thúc</p>
 										<p
 											class="mt-1 text-base font-black {contractExpiringSoon()
 												? 'text-red-600'
@@ -1648,17 +1617,13 @@
 										</p>
 									</div>
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Tiền thuê hàng tháng
-										</p>
+										<p class="text-xs font-black text-zinc-500">Tiền thuê hàng tháng</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{formatCurrency(activeContract.monthlyRent)}
 										</p>
 									</div>
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Tiền cọc giữ chỗ
-										</p>
+										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(activeContract.deposit)}
 										</p>
@@ -1693,9 +1658,7 @@
 								<!-- Fallback: hiển thị thông tin từ hồ sơ khi chưa có hợp đồng chính thức -->
 								<div class="grid grid-cols-1 gap-4 text-sm font-semibold text-black md:grid-cols-3">
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Ngày dọn vào
-										</p>
+										<p class="text-xs font-black text-zinc-500">Ngày dọn vào</p>
 										<p class="mt-1 text-base font-black text-black">
 											{tenantMoveInDate
 												? new Date(tenantMoveInDate).toLocaleDateString('vi-VN')
@@ -1703,17 +1666,13 @@
 										</p>
 									</div>
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Tiền cọc giữ chỗ
-										</p>
+										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(tenantDeposit)}
 										</p>
 									</div>
 									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
-										<p class="text-xs font-black text-zinc-500">
-											Phòng đang thuê
-										</p>
+										<p class="text-xs font-black text-zinc-500">Phòng đang thuê</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{roomDetails ? `Phòng ${roomDetails.roomNumber}` : 'Chưa xếp'}
 										</p>
@@ -1788,9 +1747,7 @@
 
 							<form onsubmit={handleSubmitDocs} class="space-y-4">
 								<div class="space-y-1">
-									<label
-										for="doc-cccd"
-										class="block text-xs font-bold text-zinc-600"
+									<label for="doc-cccd" class="block text-xs font-bold text-zinc-600"
 										>Số căn cước công dân (CCCD)</label
 									>
 									<input
@@ -1805,9 +1762,7 @@
 
 								<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 									<div class="space-y-1">
-										<span class="block text-xs font-bold text-zinc-600"
-											>Ảnh CCCD mặt trước</span
-										>
+										<span class="block text-xs font-bold text-zinc-600">Ảnh CCCD mặt trước</span>
 										<label
 											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'front'
@@ -1840,9 +1795,7 @@
 									</div>
 
 									<div class="space-y-1">
-										<span class="block text-xs font-bold text-zinc-600"
-											>Ảnh CCCD mặt sau</span
-										>
+										<span class="block text-xs font-bold text-zinc-600">Ảnh CCCD mặt sau</span>
 										<label
 											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'back'
@@ -1977,9 +1930,7 @@
 							</h3>
 
 							<form onsubmit={handleSubmitNote} class="space-y-3">
-								<label
-									for="note-text"
-									class="block text-xs font-bold text-zinc-600"
+								<label for="note-text" class="block text-xs font-bold text-zinc-600"
 									>Nội dung lời nhắn</label
 								>
 								<textarea
