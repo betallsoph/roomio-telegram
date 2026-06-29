@@ -137,12 +137,6 @@
 					</form>
 				</div>
 			</div>
-
-			<div class="mt-6 border-t-2 border-black/20 pt-5 text-center">
-				<p class="text-sm font-semibold text-zinc-600">
-					Chủ trọ: `ngochau@gmail.com` / `password` · Nhân viên: `nhanvien@nhatro.com` / `staff`
-				</p>
-			</div>
 		</section>
 	</main>
 </div>
