@@ -26,3 +26,11 @@ export function setAuthError(message: string, type: string = '') {
 	authState.errorMessage = message;
 	authState.errorType = type;
 }
+
+export function clearAuth() {
+	authState.user = null;
+	authState.isAuthenticated = false;
+	authState.isError = false;
+	authState.errorMessage = '';
+	authState.errorType = '';
+}

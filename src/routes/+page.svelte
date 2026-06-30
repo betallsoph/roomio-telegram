@@ -3,8 +3,8 @@
 	import { goto } from '$app/navigation';
 
 	onMount(() => {
-		// Tự động chuyển hướng khách vào thẳng trang chốt số điện nước
-		goto('/tenant/meters', { replaceState: true });
+		// Trang chính của Mini App là cổng khách thuê; bot có thể deep-link riêng tới /tenant/meters.
+		goto('/tenant', { replaceState: true });
 	});
 </script>
 

@@ -11,6 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/auth.svelte';
+	import { compressImage, uploadBlobToR2 } from '$lib/upload';
 
 	let pendingMeters = $state<any[]>([]);
 	let roomData = $state<any>(null);
@@ -92,49 +93,6 @@
 		}
 	});
 
-	async function compressImage(file: File): Promise<Blob> {
-		return new Promise((resolve, reject) => {
-			const reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = (e) => {
-				const img = new Image();
-				img.src = e.target?.result as string;
-				img.onload = () => {
-					const canvas = document.createElement('canvas');
-					const MAX_SIZE = 800;
-					let width = img.width;
-					let height = img.height;
-
-					if (width > height && width > MAX_SIZE) {
-						height *= MAX_SIZE / width;
-						width = MAX_SIZE;
-					} else if (height > MAX_SIZE) {
-						width *= MAX_SIZE / height;
-						height = MAX_SIZE;
-					}
-
-					canvas.width = width;
-					canvas.height = height;
-					const ctx = canvas.getContext('2d');
-					if (!ctx) return reject('No canvas context');
-
-					ctx.drawImage(img, 0, 0, width, height);
-
-					canvas.toBlob(
-						(blob) => {
-							if (blob) resolve(blob);
-							else reject('Canvas to Blob failed');
-						},
-						'image/jpeg',
-						0.5
-					);
-				};
-				img.onerror = (err) => reject(err);
-			};
-			reader.onerror = (err) => reject(err);
-		});
-	}
-
 	async function handlePhotoCapture(event: Event, meterId: string) {
 		const input = event.target as HTMLInputElement;
 		if (input.files && input.files[0]) {
@@ -142,7 +100,11 @@
 
 			toast.info('Đang nén ảnh...');
 			try {
-				const compressedBlob = await compressImage(file);
+				const meter = pendingMeters.find((m) => m.id === meterId);
+				const compressedBlob = await compressImage(
+					file,
+					`Phòng ${roomData?.roomNumber || ''} - ${meter?.serviceName || 'Đồng hồ'}`
+				);
 				console.log(
 					`Dung lượng gốc: ${(file.size / 1024).toFixed(1)}KB. Dung lượng nén: ${(compressedBlob.size / 1024).toFixed(1)}KB`
 				);
@@ -151,15 +113,20 @@
 
 				const idx = pendingMeters.findIndex((m) => m.id === meterId);
 				if (idx !== -1) {
+					if (pendingMeters[idx].photoUrl?.startsWith('blob:')) {
+						URL.revokeObjectURL(pendingMeters[idx].photoUrl);
+					}
 					pendingMeters[idx].photoUrl = previewUrl;
 					(pendingMeters[idx] as any).compressedBlob = compressedBlob;
 				}
 				toast.success(
 					`Nén ảnh siêu nhẹ thành công! (${(compressedBlob.size / 1024).toFixed(0)}KB)`
 				);
-			} catch (error) {
-				toast.error('Lỗi khi nén ảnh');
+			} catch (error: any) {
+				toast.error(error.message || 'Lỗi khi nén ảnh');
 				console.error(error);
+			} finally {
+				input.value = '';
 			}
 		}
 	}
@@ -174,6 +141,10 @@
 			toast.error('Vui lòng chụp ảnh đồng hồ');
 			return;
 		}
+		if (!activeMeter.compressedBlob) {
+			toast.error('Ảnh đồng hồ chưa sẵn sàng, vui lòng chụp lại');
+			return;
+		}
 		if (Number(activeMeter.currValue) < activeMeter.prevValue) {
 			toast.error('Số cuối kỳ không hợp lý (nhỏ hơn số đầu kỳ)');
 			return;
@@ -184,29 +155,8 @@
 		const monthStr = `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
 
 		try {
-			toast.loading('Đang xin quyền Upload...', { id: 'upload' });
-			const presignRes = await fetch('/api/uploads/presign', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				credentials: 'include',
-				body: JSON.stringify({
-					purpose: 'meter-reading',
-					contentType: meterToSubmit.compressedBlob.type || 'image/jpeg',
-					byteSize: meterToSubmit.compressedBlob.size
-				})
-			});
-			const presign = await presignRes.json();
-			if (!presignRes.ok) throw new Error(presign.error || 'Không xin được link upload');
-
-			toast.loading('Đang up ảnh lên Cloudflare R2...', { id: 'upload' });
-			const uploadRes = await fetch(presign.uploadUrl, {
-				method: 'PUT',
-				headers: presign.headers,
-				body: meterToSubmit.compressedBlob
-			});
-			if (!uploadRes.ok) throw new Error('Upload ảnh lên R2 thất bại');
-
-			const finalPhotoUrl = presign.publicUrl || presign.url;
+			toast.loading('Đang upload ảnh đồng hồ...', { id: 'upload' });
+			const finalPhotoUrl = await uploadBlobToR2(meterToSubmit.compressedBlob, 'meter-reading');
 
 			toast.loading('Đang lưu chỉ số...', { id: 'upload' });
 			const meterRes = await fetch('/api/meter-readings', {
@@ -230,6 +180,11 @@
 			const idx = pendingMeters.findIndex((m) => m.id === meterToSubmit.id);
 			if (idx !== -1) {
 				pendingMeters[idx].status = 'submitted';
+				if (pendingMeters[idx].photoUrl?.startsWith('blob:')) {
+					URL.revokeObjectURL(pendingMeters[idx].photoUrl);
+				}
+				pendingMeters[idx].photoUrl = finalPhotoUrl;
+				delete pendingMeters[idx].compressedBlob;
 			}
 			activeMeterId = null;
 		} catch (error: any) {

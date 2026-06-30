@@ -16,8 +16,9 @@
 
 			try {
 				const launchParams = retrieveLaunchParams();
-				initDataRaw = launchParams.initDataRaw || '';
-				startParam = launchParams.initDataParam || '';
+				initDataRaw = typeof launchParams.initDataRaw === 'string' ? launchParams.initDataRaw : '';
+				startParam =
+					typeof launchParams.initDataParam === 'string' ? launchParams.initDataParam : '';
 			} catch (e) {
 				console.warn('TMA SDK init failed (likely running outside Telegram):', e);
 			}

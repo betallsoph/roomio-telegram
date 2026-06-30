@@ -2,7 +2,8 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { uploadImage } from '$lib/upload';
+	import { uploadImage, uploadImageToR2 } from '$lib/upload';
+	import { authState, clearAuth, setAuthError } from '$lib/auth.svelte';
 	import {
 		Home,
 		Receipt,
@@ -117,7 +118,7 @@
 
 	let tenantId = $state<string | null>(null);
 	let tenantName = $state('');
-	let userId = $state(''); // User.id từ localStorage (dùng so sánh người gửi chat)
+	let userId = $state(''); // User.id từ Telegram auth state (dùng so sánh người gửi chat)
 	let isLoading = $state(true);
 
 	// Active navigation tab
@@ -226,10 +227,20 @@
 
 	async function handleMeterPhotoChange(e: Event) {
 		if (isUploadingMeterPhoto) return;
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
 		isUploadingMeterPhoto = true;
-		const url = await uploadFromInput(e, 'Phòng ' + (fullRoomData?.roomNumber || ''));
-		if (url) meterPhotoUrl = url;
-		isUploadingMeterPhoto = false;
+		try {
+			const label = `Phòng ${fullRoomData?.roomNumber || ''} - Đồng hồ`;
+			const url = await uploadImageToR2(file, 'meter-reading', label);
+			if (url) meterPhotoUrl = url;
+		} catch (err: any) {
+			toast.error(err.message);
+		} finally {
+			input.value = '';
+			isUploadingMeterPhoto = false;
+		}
 	}
 
 	async function handleReqImageChange(e: Event) {
@@ -335,15 +346,10 @@
 	}
 
 	onMount(() => {
-		const sessionStr = localStorage.getItem('roomio_user');
-		if (!sessionStr) {
-			goto('/login');
-			return;
-		}
-		const session = JSON.parse(sessionStr);
-		if (session.role !== 'TENANT') {
+		const session = authState.user;
+		if (!session || session.role !== 'TENANT' || !session.tenantProfileId) {
 			toast.error('Bạn không có quyền truy cập cổng khách thuê');
-			goto('/login');
+			isLoading = false;
 			return;
 		}
 		tenantId = session.tenantProfileId;
@@ -420,7 +426,7 @@
 		isLoading = true;
 		try {
 			// 1. Fetch room details (contains tenant profile & configs & readings)
-			const roomRes = await fetch(`/api/rooms?tenantId=${tId}`);
+			const roomRes = await fetch('/api/rooms');
 			const roomsData = await roomRes.json();
 			if (roomRes.ok && roomsData.length > 0) {
 				fullRoomData = roomsData[0];
@@ -454,7 +460,7 @@
 			}
 
 			// 2. Fetch invoices
-			const invRes = await fetch(`/api/invoices?tenantId=${tId}`);
+			const invRes = await fetch('/api/invoices');
 			const invData = await invRes.json();
 			if (invRes.ok) {
 				invoices = invData;
@@ -473,17 +479,17 @@
 			}
 
 			// 3. Fetch maintenance requests
-			const reqRes = await fetch(`/api/requests?tenantId=${tId}`);
+			const reqRes = await fetch('/api/requests');
 			const reqData = await reqRes.json();
 			if (reqRes.ok) requests = reqData;
 
 			// 4. Fetch special notes
-			const notesRes = await fetch(`/api/notifications?tenantId=${tId}`);
+			const notesRes = await fetch('/api/notifications');
 			const notesData = await notesRes.json();
 			if (notesRes.ok) notes = notesData;
 
 			// 5. Fetch contracts (lấy hợp đồng đang hiệu lực nếu có)
-			const contractRes = await fetch(`/api/contracts?tenantId=${tId}`);
+			const contractRes = await fetch('/api/contracts');
 			const contractData = await contractRes.json();
 			if (contractRes.ok && Array.isArray(contractData)) {
 				activeContract = contractData.find((c: Contract) => c.status === 'active') || null;
@@ -505,7 +511,6 @@
 			if (propertyId) params.set('propertyId', propertyId);
 			if (blockId) params.set('blockId', blockId);
 			if (roomId) params.set('roomId', roomId);
-			if (tenantId) params.set('tenantId', tenantId);
 
 			const res = await fetch(`/api/announcements?${params.toString()}`);
 			const data = await res.json();
@@ -605,7 +610,6 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					tenantId,
 					roomNumber: roomDetails.roomNumber,
 					buildingName: roomDetails.propertyName,
 					category: reqCategory,
@@ -648,7 +652,6 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					tenantId,
 					content: noteText
 				})
 			});
@@ -676,9 +679,10 @@
 		} catch (e) {
 			// Vẫn cho đăng xuất phía client nếu server lỗi
 		}
-		localStorage.removeItem('roomio_user');
+		clearAuth();
+		setAuthError('Bạn đã đăng xuất. Vui lòng mở lại Mini App từ Telegram để đăng nhập.');
 		toast.success('Đã đăng xuất tài khoản cư dân');
-		goto('/login');
+		goto('/');
 	}
 
 	function getStatusLabel(status: string): string {
