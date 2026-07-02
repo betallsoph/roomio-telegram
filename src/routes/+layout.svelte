@@ -98,6 +98,13 @@
 					Vui lòng yêu cầu chủ nhà gửi link kết nối vào Zalo/Tin nhắn và bấm vào link đó để tiếp
 					tục.
 				</p>
+			{:else if authState.errorMessage?.includes('initData')}
+				<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="mx-auto mb-4 h-auto w-32" />
+				<h2 class="mb-2 text-xl font-bold text-black">Mở bằng Telegram</h2>
+				<p class="mb-4 text-sm text-zinc-500">Ứng dụng này dành riêng cho cư dân trên Telegram.</p>
+				<p class="text-xs font-medium text-zinc-400">
+					Vui lòng mở ứng dụng này từ bên trong mục Chat của ứng dụng Telegram để tiếp tục.
+				</p>
 			{:else}
 				<div
 					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
