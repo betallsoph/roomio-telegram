@@ -21,6 +21,12 @@
 					typeof launchParams.initDataParam === 'string' ? launchParams.initDataParam : '';
 			} catch (e) {
 				console.warn('TMA SDK init failed (likely running outside Telegram):', e);
+				// Fallback to official Telegram WebApp object if injected
+				const w = typeof window !== 'undefined' ? (window as any) : null;
+				if (w && w.Telegram && w.Telegram.WebApp) {
+					initDataRaw = w.Telegram.WebApp.initData || '';
+					startParam = w.Telegram.WebApp.initDataUnsafe?.start_param || '';
+				}
 			}
 
 			// Nếu đang dev local không có Telegram, tạm mock một cái error để test giao diện lỗi
