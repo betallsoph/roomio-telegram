@@ -280,6 +280,10 @@
 			toast.error('Vui lòng chọn dịch vụ và nhập chỉ số mới');
 			return;
 		}
+		if (!meterPhotoUrl) {
+			toast.error('Vui lòng chụp ảnh đồng hồ để chủ nhà đối chiếu');
+			return;
+		}
 
 		isSubmittingMeter = true;
 		try {
@@ -291,7 +295,7 @@
 					serviceId: meterServiceId,
 					month: meterMonth,
 					currValue: Number(meterCurr),
-					photoUrl: meterPhotoUrl || null
+					photoUrl: meterPhotoUrl
 				})
 			});
 			const data = await res.json();
@@ -1465,7 +1469,7 @@
 
 									<div class="space-y-1">
 										<span class="block text-xs font-bold text-zinc-600"
-											>Ảnh chụp đồng hồ (Đồng kiểm)</span
+											>Ảnh chụp đồng hồ (bắt buộc)</span
 										>
 										<label
 											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {isUploadingMeterPhoto
@@ -1546,7 +1550,14 @@
 												<tr class="font-semibold text-zinc-600">
 													<td class="px-4 py-3 font-black text-black">{read.month}</td>
 													<td class="px-4 py-3 text-zinc-800">{serviceName}</td>
-													<td class="px-4 py-3">{read.prevValue} → {read.currValue}</td>
+											<td class="px-4 py-3">
+												{read.prevValue} → {read.currValue}
+												{#if read.submittedValue != null && read.submittedValue !== read.currValue}
+													<span class="block text-[10px] font-bold text-blue-500">
+														Bạn đã gửi {read.submittedValue}
+													</span>
+												{/if}
+											</td>
 													<td class="px-4 py-3 font-black text-black"
 														>{read.currValue - read.prevValue}</td
 													>

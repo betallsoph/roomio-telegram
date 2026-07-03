@@ -54,7 +54,7 @@
 
 					let status = 'pending';
 					let currValue = '';
-					if (thisMonthReading) {
+					if (thisMonthReading && thisMonthReading.status !== 'rejected') {
 						status = 'submitted';
 						currValue = thisMonthReading.currValue.toString();
 					}
@@ -133,7 +133,7 @@
 
 	async function handleSubmit() {
 		if (!activeMeter || !roomData) return;
-		if (!activeMeter.currValue) {
+		if (activeMeter.currValue === '') {
 			toast.error('Vui lòng nhập số cuối kỳ');
 			return;
 		}
