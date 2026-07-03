@@ -3,7 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { Toaster } from 'svelte-sonner';
 	import { onMount } from 'svelte';
-	import { retrieveLaunchParams } from '@tma.js/sdk';
+	import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk-svelte';
 	import { authState, setAuthUser, setAuthError } from '$lib/auth.svelte';
 
 	let { children } = $props();
@@ -11,23 +11,21 @@
 
 	onMount(async () => {
 		try {
-			let initDataRaw = '';
-			let startParam = '';
+			const webApp = window.Telegram?.WebApp;
+			let initDataRaw = webApp?.initData || '';
+			let startParam = webApp?.initDataUnsafe?.start_param || '';
 
 			try {
-				const launchParams = retrieveLaunchParams();
-				initDataRaw = typeof launchParams.initDataRaw === 'string' ? launchParams.initDataRaw : '';
-				startParam =
-					typeof launchParams.initDataParam === 'string' ? launchParams.initDataParam : '';
+				// tma.js v3 exposes raw init data separately from parsed launch parameters.
+				initDataRaw ||= retrieveRawInitData() || '';
+				startParam ||= retrieveLaunchParams().tgWebAppStartParam || '';
 			} catch (e) {
-				console.warn('TMA SDK init failed (likely running outside Telegram):', e);
-				// Fallback to official Telegram WebApp object if injected
-				const w = typeof window !== 'undefined' ? (window as any) : null;
-				if (w && w.Telegram && w.Telegram.WebApp) {
-					initDataRaw = w.Telegram.WebApp.initData || '';
-					startParam = w.Telegram.WebApp.initDataUnsafe?.start_param || '';
+				if (!initDataRaw) {
+					console.warn('Không đọc được Telegram launch parameters:', e);
 				}
 			}
+
+			webApp?.ready();
 
 			// Nếu đang dev local không có Telegram, tạm mock một cái error để test giao diện lỗi
 			if (!initDataRaw && import.meta.env.DEV) {
@@ -105,7 +103,11 @@
 					tục.
 				</p>
 			{:else if authState.errorMessage?.includes('initData')}
-				<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="mx-auto mb-4 h-auto w-32" />
+				<img
+					src="/brand/roomio-wordmark-blue600.png"
+					alt="Roomio"
+					class="mx-auto mb-4 h-auto w-32"
+				/>
 				<h2 class="mb-2 text-xl font-bold text-black">Mở bằng Telegram</h2>
 				<p class="mb-4 text-sm text-zinc-500">Ứng dụng này dành riêng cho cư dân trên Telegram.</p>
 				<p class="text-xs font-medium text-zinc-400">
