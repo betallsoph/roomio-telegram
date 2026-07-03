@@ -77,25 +77,8 @@
 		<div
 			class="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm"
 		>
+			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="mx-auto mb-5 h-auto w-36" />
 			{#if authState.errorType === 'NEEDS_INVITE'}
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-blue-500"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="32"
-						height="32"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path
-							d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-						></path></svg
-					>
-				</div>
 				<h2 class="mb-2 text-xl font-bold text-black">Chưa liên kết</h2>
 				<p class="mb-6 text-sm text-zinc-500">{authState.errorMessage}</p>
 				<p class="text-xs font-medium text-zinc-400">
@@ -103,34 +86,12 @@
 					tục.
 				</p>
 			{:else if authState.errorMessage?.includes('initData')}
-				<img
-					src="/brand/roomio-wordmark-blue600.png"
-					alt="Roomio"
-					class="mx-auto mb-4 h-auto w-32"
-				/>
 				<h2 class="mb-2 text-xl font-bold text-black">Mở bằng Telegram</h2>
 				<p class="mb-4 text-sm text-zinc-500">Ứng dụng này dành riêng cho cư dân trên Telegram.</p>
 				<p class="text-xs font-medium text-zinc-400">
 					Vui lòng mở ứng dụng này từ bên trong mục Chat của ứng dụng Telegram để tiếp tục.
 				</p>
 			{:else}
-				<div
-					class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-500"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="32"
-						height="32"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"
-						></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg
-					>
-				</div>
 				<h2 class="mb-2 text-xl font-bold text-black">Lỗi truy cập</h2>
 				<p class="text-sm text-zinc-500">{authState.errorMessage}</p>
 			{/if}
