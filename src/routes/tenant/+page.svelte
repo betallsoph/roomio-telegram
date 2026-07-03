@@ -1550,14 +1550,14 @@
 												<tr class="font-semibold text-zinc-600">
 													<td class="px-4 py-3 font-black text-black">{read.month}</td>
 													<td class="px-4 py-3 text-zinc-800">{serviceName}</td>
-											<td class="px-4 py-3">
-												{read.prevValue} → {read.currValue}
-												{#if read.submittedValue != null && read.submittedValue !== read.currValue}
-													<span class="block text-[10px] font-bold text-blue-500">
-														Bạn đã gửi {read.submittedValue}
-													</span>
-												{/if}
-											</td>
+													<td class="px-4 py-3">
+														{read.prevValue} → {read.currValue}
+														{#if read.submittedValue != null && read.submittedValue !== read.currValue}
+															<span class="block text-[10px] font-bold text-blue-500">
+																Bạn đã gửi {read.submittedValue}
+															</span>
+														{/if}
+													</td>
 													<td class="px-4 py-3 font-black text-black"
 														>{read.currValue - read.prevValue}</td
 													>
