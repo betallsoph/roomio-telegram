@@ -100,27 +100,51 @@ export async function compressImage(
 }
 
 export async function uploadBlobToR2(blob: Blob, purpose: UploadPurpose): Promise<string> {
-	const presignRes = await fetch('/api/uploads/presign', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		credentials: 'include',
-		body: JSON.stringify({
-			purpose,
-			contentType: blob.type || 'image/jpeg',
-			byteSize: blob.size
-		})
-	});
-	const presign = await presignRes.json();
+	let presignRes: Response;
+	try {
+		presignRes = await fetch('/api/uploads/presign', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			credentials: 'include',
+			body: JSON.stringify({
+				purpose,
+				contentType: blob.type || 'image/jpeg',
+				byteSize: blob.size
+			})
+		});
+	} catch {
+		throw new Error('Không kết nối được máy chủ để xin link upload');
+	}
+
+	const presign = await presignRes.json().catch(() => ({}));
 	if (!presignRes.ok) throw new Error(presign.error || 'Không xin được link upload');
 
-	const uploadRes = await fetch(presign.uploadUrl, {
-		method: 'PUT',
-		headers: presign.headers,
-		body: blob
-	});
-	if (!uploadRes.ok) throw new Error('Upload ảnh lên R2 thất bại');
+	let uploadUrl: URL;
+	try {
+		uploadUrl = new URL(presign.uploadUrl);
+		if (uploadUrl.protocol !== 'https:' && uploadUrl.protocol !== 'http:') throw new Error();
+	} catch {
+		throw new Error('Máy chủ trả về link upload R2 không hợp lệ');
+	}
 
-	return presign.publicUrl || presign.url;
+	let uploadRes: Response;
+	try {
+		uploadRes = await fetch(uploadUrl.toString(), {
+			method: 'PUT',
+			headers: presign.headers || { 'Content-Type': blob.type || 'image/jpeg' },
+			body: blob
+		});
+	} catch {
+		throw new Error('Không kết nối được R2. Vui lòng thử lại');
+	}
+	if (!uploadRes.ok) throw new Error(`Upload ảnh lên R2 thất bại (${uploadRes.status})`);
+
+	const publicUrl = presign.publicUrl || presign.url;
+	try {
+		return new URL(publicUrl).toString();
+	} catch {
+		throw new Error('Máy chủ trả về link ảnh không hợp lệ');
+	}
 }
 
 export async function uploadImageToR2(
