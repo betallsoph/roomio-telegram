@@ -834,7 +834,7 @@
 						Bảng tin thông báo
 					</h3>
 					<div
-						class="divide-y-2 divide-black overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary"
+						class="divide-y divide-black/10 overflow-hidden rounded-lg border border-black/15 bg-white"
 					>
 						{#each announcements as ann}
 							<div class="flex flex-col gap-1 bg-white p-4 transition-colors hover:bg-slate-50">
@@ -972,7 +972,7 @@
 								</button>
 							</div>
 						{:else}
-							<section class="flex items-center gap-3 border-y-2 border-black py-4">
+							<section class="flex items-center gap-3 py-3">
 								<CheckCircle2 class="h-9 w-9 shrink-0 text-green-500" />
 								<div>
 									<h3 class="text-sm font-black text-black">Đã đóng sạch cước phí nhà!</h3>
@@ -984,9 +984,7 @@
 						{/if}
 
 						<!-- General Help Grid info -->
-						<div
-							class="divide-y-2 divide-black border-y-2 border-black sm:grid sm:grid-cols-2 sm:divide-x-2 sm:divide-y-0"
-						>
+						<div class="grid gap-2 sm:grid-cols-2 sm:gap-8">
 							<button
 								type="button"
 								onclick={() => (activeTab = 'request')}
@@ -1142,7 +1140,7 @@
 
 						<!-- Bills list history -->
 						<section class="space-y-3">
-							<div class="flex items-center gap-2 border-b-2 border-black pb-3">
+							<div class="flex items-center gap-2">
 								<Receipt class="h-5 w-5 text-black" />
 								<h3 class="text-lg font-black text-black">Lịch sử hóa đơn</h3>
 							</div>
@@ -1152,7 +1150,7 @@
 									Chưa có hóa đơn nào được tạo.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black border-b-2 border-black">
+								<div class="divide-y divide-black/10">
 									{#each invoices as invoice}
 										<div
 											class="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center"
@@ -1211,9 +1209,7 @@
 					<div class="space-y-6">
 						<!-- Create repair ticket form -->
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Gửi báo cáo sự cố kỹ thuật phòng <Wrench class="h-5 w-5" />
 							</h3>
 
@@ -1311,7 +1307,7 @@
 									</div>
 								</div>
 
-								<div class="flex justify-end border-t-2 border-black pt-3">
+								<div class="flex justify-end pt-1">
 									<button
 										type="submit"
 										disabled={isSubmittingRequest}
@@ -1328,7 +1324,7 @@
 
 						<!-- Incidents history list -->
 						<section class="space-y-3">
-							<div class="border-b-2 border-black pb-3">
+							<div>
 								<h3 class="text-lg font-black text-black">Lịch sử sự cố đã gửi</h3>
 							</div>
 
@@ -1337,7 +1333,7 @@
 									Chưa có sự cố nào được ghi nhận.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black border-b-2 border-black">
+								<div class="divide-y divide-black/10">
 									{#each requests as req}
 										<div class="space-y-2 p-4 transition-colors hover:bg-slate-50">
 											<div class="flex items-start justify-between">
@@ -1397,9 +1393,7 @@
 				{:else if activeTab === 'meters'}
 					<div class="space-y-6">
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Báo số điện / số nước cuối tháng <Zap class="h-5 w-5 text-black" />
 							</h3>
 
@@ -1500,7 +1494,7 @@
 										{/if}
 									</div>
 
-									<div class="flex justify-end border-t-2 border-black pt-3">
+									<div class="flex justify-end pt-1">
 										<button
 											type="submit"
 											disabled={isSubmittingMeter}
@@ -1518,7 +1512,7 @@
 
 						<!-- Readings History -->
 						<section class="space-y-3">
-							<div class="border-b-2 border-black pb-3">
+							<div>
 								<h3 class="text-lg font-black text-black">Lịch sử tự báo số điện nước</h3>
 							</div>
 
@@ -1527,10 +1521,10 @@
 									Chưa có lịch sử báo số nào.
 								</p>
 							{:else}
-								<div class="overflow-x-auto border-b-2 border-black">
+								<div class="overflow-x-auto">
 									<table class="w-full border-collapse text-left text-xs">
 										<thead>
-											<tr class="border-b-2 border-black bg-zinc-50 font-black text-zinc-600">
+											<tr class="border-b border-black/10 bg-zinc-50 font-black text-zinc-600">
 												<th class="px-4 py-3">Tháng</th>
 												<th class="px-4 py-3">Dịch vụ</th>
 												<th class="px-4 py-3">Chỉ số Cũ → Mới</th>
@@ -1595,9 +1589,7 @@
 					<div class="space-y-6">
 						<!-- Contract details view -->
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Thông tin Hợp đồng thuê nhà <Calendar class="h-5 w-5 text-black" />
 							</h3>
 
@@ -1708,9 +1700,7 @@
 
 						<!-- Referral: giới thiệu phòng trống cho bạn bè -->
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Giới thiệu phòng trống cho bạn bè <Home class="h-5 w-5 text-black" />
 							</h3>
 
@@ -1719,7 +1709,7 @@
 									Hiện tòa nhà không còn phòng trống nào.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black border-y-2 border-black">
+								<div class="divide-y divide-black/10">
 									{#each emptyRooms as room}
 										<div class="flex items-center justify-between gap-3 py-3">
 											<div>
@@ -1747,9 +1737,7 @@
 
 						<!-- Documents Upload Form -->
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Đồng bộ giấy tờ tùy thân & Ảnh check-in nhận phòng <Camera
 									class="h-5 w-5 text-black"
 								/>
@@ -1910,7 +1898,7 @@
 									</div>
 								</div>
 
-								<div class="flex justify-end border-t-2 border-black pt-3">
+								<div class="flex justify-end pt-1">
 									<button
 										type="submit"
 										disabled={isSubmittingDocs}
@@ -1931,9 +1919,7 @@
 					<div class="space-y-6">
 						<!-- Create note form -->
 						<section class="space-y-4">
-							<h3
-								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
-							>
+							<h3 class="flex items-center gap-2 text-base font-black text-black">
 								Gửi lời nhắn / Đề xuất đặc biệt tới chủ trọ <MessageSquare
 									class="h-5 w-5 text-black"
 								/>
@@ -1952,7 +1938,7 @@
 									class="w-full rounded-lg border-2 border-black bg-white p-3 text-xs font-semibold text-black focus:outline-none"
 								></textarea>
 
-								<div class="flex justify-end border-t-2 border-black pt-3">
+								<div class="flex justify-end pt-1">
 									<button
 										type="submit"
 										disabled={isSubmittingNote}
@@ -1969,7 +1955,7 @@
 
 						<!-- Notes list history -->
 						<section class="space-y-3">
-							<div class="border-b-2 border-black pb-3">
+							<div>
 								<h3 class="text-lg font-black text-black">Lời nhắn đã gửi</h3>
 							</div>
 
@@ -1978,7 +1964,7 @@
 									Chưa gửi lời nhắn nào.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black border-b-2 border-black">
+								<div class="divide-y divide-black/10">
 									{#each notes as note}
 										<div class="space-y-2 py-4">
 											<div class="flex items-center justify-between text-xs">
@@ -2015,10 +2001,8 @@
 
 					<!-- 7. CHAT TAB -->
 				{:else if activeTab === 'chat'}
-					<div
-						class="flex flex-col overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary"
-					>
-						<div class="flex items-center gap-2 border-b-2 border-black bg-zinc-100 p-5">
+					<div class="flex flex-col overflow-hidden rounded-lg border border-black/15 bg-white">
+						<div class="flex items-center gap-2 border-b border-black/10 bg-zinc-50 p-4">
 							<MessageSquare class="h-5 w-5 text-black" />
 							<h3 class="text-lg font-black text-black">Chat với chủ nhà</h3>
 						</div>
@@ -2061,7 +2045,7 @@
 
 							<form
 								onsubmit={handleSendChat}
-								class="flex items-center gap-2 border-t-2 border-black bg-white p-3"
+								class="flex items-center gap-2 border-t border-black/10 bg-white p-3"
 							>
 								<input
 									type="text"
