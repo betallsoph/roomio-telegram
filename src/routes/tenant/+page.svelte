@@ -758,23 +758,18 @@
 	}
 </script>
 
-<div class="relative flex min-h-screen flex-col overflow-hidden bg-white font-sans text-black">
-	<div class="roomio-grid-bg fixed inset-0 -z-10 opacity-60"></div>
-	<div class="fixed inset-0 -z-10 bg-gradient-to-b from-white/90 via-white/70 to-white/95"></div>
-	<!-- Interactive Grid Background Overlay -->
-	<div
-		class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,black_1px,transparent_0)] bg-[size:16px_16px] opacity-[0.02]"
-	></div>
-
-	<!-- Top header -->
+<div class="relative flex min-h-screen flex-col overflow-hidden bg-zinc-50 font-sans text-black">
 	<header
-		class="sticky top-0 z-40 mx-auto flex w-full max-w-4xl shrink-0 items-center justify-between bg-transparent px-4 py-4 text-black sm:px-6 sm:py-5"
+		class="sticky top-0 z-40 mx-auto flex w-full max-w-4xl shrink-0 items-center justify-between border-b border-zinc-100 bg-zinc-50/95 px-4 py-3 text-black backdrop-blur sm:px-6 sm:py-4"
 	>
 		<div class="flex items-center">
 			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="h-auto w-32" />
 		</div>
 
-		<button onclick={handleLogout} class="roomio-button-white px-3 py-1.5 text-xs">
+		<button
+			onclick={handleLogout}
+			class="inline-flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 shadow-sm"
+		>
 			Đăng xuất
 			<LogOut class="h-4 w-4" />
 		</button>
@@ -788,21 +783,15 @@
 			</div>
 		</div>
 	{:else}
-		<!-- Shell Wrapper -->
 		<main
-			class="relative z-10 mx-auto w-full max-w-4xl flex-grow space-y-5 px-4 pb-24 sm:space-y-6 sm:px-6"
+			class="relative z-10 mx-auto w-full max-w-4xl flex-grow space-y-4 px-4 py-4 pb-24 sm:space-y-5 sm:px-6"
 		>
-			<!-- Welcome Header Profile Card - Styled as Brutallist Card -->
 			<div
-				class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-lg border-2 border-black bg-blue-100 p-4 text-black shadow-secondary sm:flex-row sm:items-center sm:p-6"
+				class="flex flex-col justify-between gap-4 border-b border-zinc-100 pb-4 sm:flex-row sm:items-center"
 			>
-				<div
-					class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:16px_16px]"
-				></div>
-
-				<div class="relative z-10 flex items-center gap-4">
+				<div class="flex items-center gap-3.5">
 					<div
-						class="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-[3px] border-black bg-white text-xl font-black text-black shadow-secondary"
+						class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-xl font-black text-blue-600"
 					>
 						{tenantName.slice(0, 1).toUpperCase()}
 					</div>
@@ -819,7 +808,7 @@
 				</div>
 
 				{#if roomDetails}
-					<div class="relative z-10 shrink-0 text-left sm:text-right">
+					<div class="shrink-0 text-left sm:text-right">
 						<span class="block text-xs font-bold text-zinc-500">Giá phòng thuê</span>
 						<span class="text-2xl font-black">{formatCurrency(roomDetails.monthlyRent)}</span>
 					</div>
@@ -834,13 +823,13 @@
 						Bảng tin thông báo
 					</h3>
 					<div
-						class="divide-y divide-black/10 overflow-hidden rounded-lg border border-black/15 bg-white"
+						class="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white"
 					>
 						{#each announcements as ann}
 							<div class="flex flex-col gap-1 bg-white p-4 transition-colors hover:bg-slate-50">
 								<h4 class="flex items-center gap-2 text-sm font-black text-black">
 									<span
-										class="h-2.5 w-2.5 rounded-full border border-black {ann.isImportant
+										class="h-2.5 w-2.5 rounded-full border border-zinc-300 {ann.isImportant
 											? 'animate-pulse bg-red-500'
 											: 'bg-zinc-400'}"
 									></span>
@@ -855,16 +844,15 @@
 				</div>
 			{/if}
 
-			<!-- TAB SELECTION: Brutallist style tabs -->
 			<div
-				class="flex shrink-0 scrollbar-none gap-1 overflow-x-auto border-y-2 border-black bg-white py-1 whitespace-nowrap select-none sm:rounded-lg sm:border-2 sm:p-1 sm:shadow-sm"
+				class="flex shrink-0 scrollbar-none gap-1 overflow-x-auto rounded-xl bg-zinc-100 p-1 whitespace-nowrap select-none"
 			>
 				<button
 					onclick={() => (activeTab = 'home')}
 					class="min-w-[80px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'home'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Trang chủ
 				</button>
@@ -872,8 +860,8 @@
 					onclick={() => (activeTab = 'bills')}
 					class="min-w-[80px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'bills'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Hóa đơn ({invoices.length})
 				</button>
@@ -881,8 +869,8 @@
 					onclick={() => (activeTab = 'request')}
 					class="min-w-[100px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'request'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Báo sự cố ({requests.length})
 				</button>
@@ -890,8 +878,8 @@
 					onclick={() => (activeTab = 'meters')}
 					class="min-w-[120px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'meters'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Báo điện nước
 				</button>
@@ -899,8 +887,8 @@
 					onclick={() => (activeTab = 'documents')}
 					class="min-w-[130px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'documents'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Giấy tờ & Hợp đồng
 				</button>
@@ -908,8 +896,8 @@
 					onclick={() => (activeTab = 'note')}
 					class="min-w-[100px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'note'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Lời nhắn
 				</button>
@@ -917,8 +905,8 @@
 					onclick={() => (activeTab = 'chat')}
 					class="min-w-[80px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'chat'
-						? 'border-2 border-black bg-blue-300 text-black'
-						: 'border border-transparent text-zinc-600 hover:bg-white/50'}"
+						? 'bg-white text-black shadow-sm'
+						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Chat
 				</button>
@@ -932,11 +920,11 @@
 						<!-- Pending Bill Alert Box -->
 						{#if pendingInvoice()}
 							<div
-								class="flex flex-col justify-between gap-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary md:flex-row md:items-center"
+								class="flex flex-col justify-between gap-4 rounded-lg border border-zinc-300 bg-white p-5 shadow-sm md:flex-row md:items-center"
 							>
 								<div class="flex items-start gap-3.5">
 									<div
-										class="shrink-0 rounded-lg border-2 border-black bg-white p-3 text-black shadow-secondary"
+										class="shrink-0 rounded-lg border border-zinc-300 bg-white p-3 text-black shadow-sm"
 									>
 										<Receipt class="h-6 w-6" />
 									</div>
@@ -953,7 +941,7 @@
 											>
 											{#if pendingInvoice()!.paymentProofImage}
 												<span
-													class="rounded-full border border-black bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-800"
+													class="rounded-full border border-zinc-300 bg-amber-200 px-2 py-0.5 text-xs font-bold text-amber-800"
 													>Đang chờ đối soát</span
 												>
 											{/if}
@@ -966,7 +954,7 @@
 										openPayment(pendingInvoice()!);
 										activeTab = 'bills';
 									}}
-									class="flex cursor-pointer items-center justify-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-3 text-sm font-bold text-black shadow-primary transition-all"
+									class="flex cursor-pointer items-center justify-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-3 text-sm font-bold text-black shadow-sm transition-all"
 								>
 									Quét QR thanh toán <QrCode class="h-4.5 w-4.5" />
 								</button>
@@ -1025,9 +1013,9 @@
 						{#if payingInvoice}
 							<!-- PayOS Payment Detail -->
 							<div
-								class="animate-[scale-up_0.2s_ease-out] space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary"
+								class="animate-[scale-up_0.2s_ease-out] space-y-4 rounded-lg border border-zinc-300 bg-white p-5 shadow-sm"
 							>
-								<div class="flex items-center justify-between border-b-2 border-black pb-2">
+								<div class="flex items-center justify-between border-b border-zinc-200 pb-2">
 									<h3 class="flex items-center gap-1.5 text-sm font-black text-black">
 										Thanh Toán Hóa Đơn {payingInvoice.id}
 										<QrCode class="h-4.5 w-4.5" />
@@ -1042,7 +1030,7 @@
 
 								<div class="flex flex-col items-center gap-6 md:flex-row">
 									<div
-										class="flex h-64 w-full flex-col items-center justify-center rounded-lg border-2 border-black bg-blue-50 p-4 text-center shadow-secondary md:w-64"
+										class="flex h-64 w-full flex-col items-center justify-center rounded-lg border border-zinc-300 bg-blue-50 p-4 text-center shadow-sm md:w-64"
 									>
 										{#if isCreatingPaymentLink}
 											<Loader2 class="mb-3 h-10 w-10 animate-spin text-black" />
@@ -1057,7 +1045,7 @@
 												href={payingInvoice.payosCheckoutUrl}
 												target="_blank"
 												rel="noreferrer"
-												class="mt-4 rounded-[6px] border-2 border-black bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-secondary transition-all"
+												class="mt-4 rounded-[6px] border border-zinc-300 bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-sm transition-all"
 											>
 												Mở PayOS
 											</a>
@@ -1070,14 +1058,14 @@
 
 									<!-- Bank Info and Proof Upload -->
 									<div class="w-full flex-1 space-y-3">
-										<div class="space-y-2 border-b-2 border-black pb-3 text-xs">
+										<div class="space-y-2 border-b border-zinc-200 pb-3 text-xs">
 											<p class="font-black text-zinc-500">Thông tin thanh toán</p>
 											<p class="text-sm font-black text-black">Cổng thanh toán PayOS</p>
 											<p class="font-black text-indigo-600">
 												Số tiền: {formatCurrency(payingInvoice.totalAmount)}
 											</p>
 											<p
-												class="mt-1 w-fit rounded border-2 border-black bg-white px-2 py-1 font-mono font-black text-black"
+												class="mt-1 w-fit rounded border border-zinc-300 bg-white px-2 py-1 font-mono font-black text-black"
 											>
 												Mã hóa đơn: {payingInvoice.id}
 											</p>
@@ -1094,7 +1082,7 @@
 												>Chụp/tải ảnh Bill chuyển khoản thành công</span
 											>
 											<label
-												class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {isUploadingProofImage
+												class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {isUploadingProofImage
 													? 'pointer-events-none opacity-50'
 													: ''}"
 											>
@@ -1118,14 +1106,14 @@
 												<img
 													src={proofImageUrl}
 													alt="Ảnh bill chuyển khoản"
-													class="h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+													class="h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 												/>
 											{/if}
 
 											<button
 												type="submit"
 												disabled={isSubmittingProof}
-												class="flex w-full cursor-pointer items-center justify-center gap-1 rounded-[6px] border-2 border-black bg-blue-300 py-2.5 text-xs font-black text-black shadow-secondary transition-all hover:bg-blue-400 disabled:opacity-50"
+												class="flex w-full cursor-pointer items-center justify-center gap-1 rounded-[6px] border border-zinc-300 bg-blue-300 py-2.5 text-xs font-black text-black shadow-sm transition-all hover:bg-blue-400 disabled:opacity-50"
 											>
 												Gửi hóa đơn chứng nhận đã chuyển khoản
 												{#if isSubmittingProof}
@@ -1150,7 +1138,7 @@
 									Chưa có hóa đơn nào được tạo.
 								</p>
 							{:else}
-								<div class="divide-y divide-black/10">
+								<div class="divide-y divide-zinc-100">
 									{#each invoices as invoice}
 										<div
 											class="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center"
@@ -1161,7 +1149,7 @@
 														Hóa đơn tháng {invoice.month}
 													</h4>
 													<span
-														class="rounded-full border border-black px-2.5 py-0.5 text-[9px] font-black {invoice.status ===
+														class="rounded-full border border-zinc-300 px-2.5 py-0.5 text-[9px] font-black {invoice.status ===
 														'paid'
 															? 'bg-green-200 text-green-800'
 															: 'bg-red-200 text-red-800'}"
@@ -1191,7 +1179,7 @@
 															openPayment(invoice);
 															window.scrollTo({ top: 0, behavior: 'smooth' });
 														}}
-														class="cursor-pointer rounded-[6px] border-2 border-black bg-blue-300 px-3 py-1.5 text-xs font-black text-black shadow-secondary transition-all hover:bg-blue-400"
+														class="cursor-pointer rounded-[6px] border border-zinc-300 bg-blue-300 px-3 py-1.5 text-xs font-black text-black shadow-sm transition-all hover:bg-blue-400"
 													>
 														Thanh toán
 													</button>
@@ -1222,7 +1210,7 @@
 										<select
 											id="req-cat"
 											bind:value={reqCategory}
-											class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
+											class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 										>
 											<option value="maintenance">Nội thất/Gia dụng</option>
 											<option value="plumbing">Đường ống nước</option>
@@ -1241,7 +1229,7 @@
 											bind:value={reqTitle}
 											required
 											placeholder="Rò rỉ nước nhà tắm / Hỏng máy lạnh..."
-											class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
+											class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 										/>
 									</div>
 								</div>
@@ -1256,7 +1244,7 @@
 										required
 										rows="3"
 										placeholder="Mô tả cụ thể vấn đề giúp thợ sửa dễ hình dung (vị trí hỏng, hiện trạng)..."
-										class="w-full rounded-lg border-2 border-black bg-white p-3 text-xs font-semibold text-black focus:outline-none"
+										class="w-full rounded-lg border border-zinc-300 bg-white p-3 text-xs font-semibold text-black focus:outline-none"
 									></textarea>
 								</div>
 
@@ -1266,7 +1254,7 @@
 											>Ảnh chụp sự cố (Tùy chọn)</span
 										>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {isUploadingReqImage
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {isUploadingReqImage
 												? 'pointer-events-none opacity-50'
 												: ''}"
 										>
@@ -1290,7 +1278,7 @@
 											<img
 												src={reqImage}
 												alt="Ảnh sự cố"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1299,7 +1287,7 @@
 											id="req-imp"
 											type="checkbox"
 											bind:checked={reqIsImportant}
-											class="h-4.5 w-4.5 cursor-pointer rounded border-2 border-black text-black focus:ring-blue-300"
+											class="h-4.5 w-4.5 cursor-pointer rounded border border-zinc-300 text-black focus:ring-blue-300"
 										/>
 										<label for="req-imp" class="block cursor-pointer text-red-600"
 											>Sự cố khẩn cấp (Cần xử lý gấp)</label
@@ -1311,7 +1299,7 @@
 									<button
 										type="submit"
 										disabled={isSubmittingRequest}
-										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-secondary transition-all"
+										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-sm transition-all"
 									>
 										Gửi yêu cầu sửa chữa
 										{#if isSubmittingRequest}
@@ -1333,7 +1321,7 @@
 									Chưa có sự cố nào được ghi nhận.
 								</p>
 							{:else}
-								<div class="divide-y divide-black/10">
+								<div class="divide-y divide-zinc-100">
 									{#each requests as req}
 										<div class="space-y-2 p-4 transition-colors hover:bg-slate-50">
 											<div class="flex items-start justify-between">
@@ -1341,7 +1329,7 @@
 													<div class="flex items-center gap-2">
 														<h4 class="text-sm font-black text-black">{req.title}</h4>
 														<span
-															class="rounded-full border border-black px-2 py-0.5 text-[9px] font-black {req.status ===
+															class="rounded-full border border-zinc-300 px-2 py-0.5 text-[9px] font-black {req.status ===
 															'completed'
 																? 'bg-green-150 text-green-800'
 																: req.status === 'in_progress'
@@ -1354,7 +1342,7 @@
 														</span>
 														{#if req.priority === 'important'}
 															<span
-																class="animate-pulse rounded-full border border-black bg-red-500 px-2 py-0.5 text-[9px] font-black text-white"
+																class="animate-pulse rounded-full border border-zinc-300 bg-red-500 px-2 py-0.5 text-[9px] font-black text-white"
 																>Gấp</span
 															>
 														{/if}
@@ -1371,7 +1359,7 @@
 											<!-- Landlord reply message -->
 											{#if req.response}
 												<div
-													class="mt-2 space-y-1 rounded-lg border-2 border-black bg-blue-50 p-3 text-xs"
+													class="mt-2 space-y-1 rounded-lg border border-zinc-300 bg-blue-50 p-3 text-xs"
 												>
 													<p class="flex items-center gap-1 font-black text-black">
 														Phản hồi của chủ nhà:
@@ -1412,7 +1400,7 @@
 												id="tenant-m-serv"
 												bind:value={meterServiceId}
 												required
-												class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
+												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 											>
 												<option value="">-- Chọn dịch vụ --</option>
 												{#each fullRoomData.services.filter((s: any) => s.service.type === 'METERED') as c}
@@ -1429,7 +1417,7 @@
 												type="month"
 												bind:value={meterMonth}
 												required
-												class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
+												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 											/>
 										</div>
 									</div>
@@ -1439,7 +1427,7 @@
 											<span class="block text-xs font-bold text-zinc-600">Chỉ số cũ (Kỳ trước)</span
 											>
 											<div
-												class="w-full rounded-lg border-2 border-black bg-zinc-100 px-3 py-2 text-xs font-black text-black"
+												class="w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-xs font-black text-black"
 											>
 												{meterPrev}
 											</div>
@@ -1455,7 +1443,7 @@
 												required
 												min={meterPrev}
 												placeholder="Nhập số đo thực tế..."
-												class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-black text-black focus:border-indigo-500 focus:outline-none"
+												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black focus:border-indigo-500 focus:outline-none"
 											/>
 										</div>
 									</div>
@@ -1465,7 +1453,7 @@
 											>Ảnh chụp đồng hồ (bắt buộc)</span
 										>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {isUploadingMeterPhoto
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {isUploadingMeterPhoto
 												? 'pointer-events-none opacity-50'
 												: ''}"
 										>
@@ -1489,7 +1477,7 @@
 											<img
 												src={meterPhotoUrl}
 												alt="Ảnh đồng hồ vừa chụp"
-												class="mt-2 aspect-[3/4] h-28 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-cover p-1 shadow-secondary"
+												class="mt-2 aspect-[3/4] h-28 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-cover p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1498,7 +1486,7 @@
 										<button
 											type="submit"
 											disabled={isSubmittingMeter}
-											class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-secondary transition-all"
+											class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-sm transition-all"
 										>
 											Gửi chỉ số
 											{#if isSubmittingMeter}
@@ -1524,7 +1512,7 @@
 								<div class="overflow-x-auto">
 									<table class="w-full border-collapse text-left text-xs">
 										<thead>
-											<tr class="border-b border-black/10 bg-zinc-50 font-black text-zinc-600">
+											<tr class="border-b border-zinc-100 bg-zinc-50 font-black text-zinc-600">
 												<th class="px-4 py-3">Tháng</th>
 												<th class="px-4 py-3">Dịch vụ</th>
 												<th class="px-4 py-3">Chỉ số Cũ → Mới</th>
@@ -1556,7 +1544,7 @@
 													>
 													<td class="px-4 py-3">
 														<span
-															class="rounded border-2 border-black px-1.5 text-xs font-black {badge.cls}"
+															class="rounded border border-zinc-300 px-1.5 text-xs font-black {badge.cls}"
 															>{badge.label}</span
 														>
 													</td>
@@ -1598,14 +1586,14 @@
 								<div
 									class="grid grid-cols-1 gap-x-6 text-sm font-semibold text-black md:grid-cols-2"
 								>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Ngày bắt đầu</p>
 										<p class="mt-1 text-base font-black text-black">
 											{new Date(activeContract.startDate).toLocaleDateString('vi-VN')}
 										</p>
 									</div>
 									<div
-										class="border-b border-black/20 py-3 {contractExpiringSoon()
+										class="border-b border-zinc-200 py-3 {contractExpiringSoon()
 											? 'bg-red-100 px-3'
 											: ''}"
 									>
@@ -1618,19 +1606,19 @@
 											{new Date(activeContract.endDate).toLocaleDateString('vi-VN')}
 											{#if contractExpiringSoon()}
 												<span
-													class="ml-1 rounded-full border border-black bg-red-500 px-2 py-0.5 align-middle text-[9px] font-black text-white"
+													class="ml-1 rounded-full border border-zinc-300 bg-red-500 px-2 py-0.5 align-middle text-[9px] font-black text-white"
 													>Sắp hết hạn</span
 												>
 											{/if}
 										</p>
 									</div>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền thuê hàng tháng</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{formatCurrency(activeContract.monthlyRent)}
 										</p>
 									</div>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(activeContract.deposit)}
@@ -1643,14 +1631,14 @@
 										href={activeContract.fileUrl}
 										target="_blank"
 										rel="noreferrer"
-										class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-blue-400"
+										class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-blue-400"
 									>
 										<FileText class="h-4 w-4" />
 										Xem file hợp đồng
 									</a>
 								{/if}
 
-								<div class="space-y-1 border-l-2 border-black py-1 pl-3">
+								<div class="space-y-1 border-l border-zinc-200 py-1 pl-3">
 									<span class="block text-xs font-black text-zinc-500"
 										>Ghi chú & Thỏa thuận hợp đồng</span
 									>
@@ -1665,7 +1653,7 @@
 								<div
 									class="grid grid-cols-1 gap-x-6 text-sm font-semibold text-black md:grid-cols-3"
 								>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Ngày dọn vào</p>
 										<p class="mt-1 text-base font-black text-black">
 											{tenantMoveInDate
@@ -1673,13 +1661,13 @@
 												: '--'}
 										</p>
 									</div>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(tenantDeposit)}
 										</p>
 									</div>
-									<div class="border-b border-black/20 py-3">
+									<div class="border-b border-zinc-200 py-3">
 										<p class="text-xs font-black text-zinc-500">Phòng đang thuê</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{roomDetails ? `Phòng ${roomDetails.roomNumber}` : 'Chưa xếp'}
@@ -1687,7 +1675,7 @@
 									</div>
 								</div>
 
-								<div class="space-y-1 border-l-2 border-black py-1 pl-3">
+								<div class="space-y-1 border-l border-zinc-200 py-1 pl-3">
 									<span class="block text-xs font-black text-zinc-500"
 										>Ghi chú & Thỏa thuận hợp đồng</span
 									>
@@ -1709,7 +1697,7 @@
 									Hiện tòa nhà không còn phòng trống nào.
 								</p>
 							{:else}
-								<div class="divide-y divide-black/10">
+								<div class="divide-y divide-zinc-100">
 									{#each emptyRooms as room}
 										<div class="flex items-center justify-between gap-3 py-3">
 											<div>
@@ -1727,7 +1715,7 @@
 
 								<button
 									onclick={handleCopyReferral}
-									class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-secondary transition-all"
+									class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-sm transition-all"
 								>
 									<Copy class="h-4 w-4" />
 									Sao chép lời giới thiệu
@@ -1754,7 +1742,7 @@
 										bind:value={tenantIdNumber}
 										required
 										placeholder="Nhập 12 số CCCD..."
-										class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-black text-black focus:outline-none"
+										class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black focus:outline-none"
 									/>
 								</div>
 
@@ -1762,7 +1750,7 @@
 									<div class="space-y-1">
 										<span class="block text-xs font-bold text-zinc-600">Ảnh CCCD mặt trước</span>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'front'
 												? 'pointer-events-none opacity-50'
 												: ''}"
@@ -1787,7 +1775,7 @@
 											<img
 												src={tenantIdFrontImage}
 												alt="Mặt trước CCCD"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1795,7 +1783,7 @@
 									<div class="space-y-1">
 										<span class="block text-xs font-bold text-zinc-600">Ảnh CCCD mặt sau</span>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'back'
 												? 'pointer-events-none opacity-50'
 												: ''}"
@@ -1820,7 +1808,7 @@
 											<img
 												src={tenantIdBackImage}
 												alt="Mặt sau CCCD"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1832,7 +1820,7 @@
 											>Ảnh đăng ký xe / Cà vẹt (Nếu có gửi xe)</span
 										>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'vehicle'
 												? 'pointer-events-none opacity-50'
 												: ''}"
@@ -1857,7 +1845,7 @@
 											<img
 												src={tenantVehicleImage}
 												alt="Ảnh cà vẹt xe"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1867,7 +1855,7 @@
 											>Ảnh bàn giao phòng (Lúc check-in)</span
 										>
 										<label
-											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-white px-3 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-zinc-100 {uploadingDocField ===
+											class="flex w-fit cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-zinc-100 {uploadingDocField ===
 											'checkin'
 												? 'pointer-events-none opacity-50'
 												: ''}"
@@ -1892,7 +1880,7 @@
 											<img
 												src={tenantCheckInImage}
 												alt="Ảnh check-in bàn giao"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border border-zinc-300 bg-white object-contain p-1 shadow-sm"
 											/>
 										{/if}
 									</div>
@@ -1902,7 +1890,7 @@
 									<button
 										type="submit"
 										disabled={isSubmittingDocs}
-										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-secondary transition-all"
+										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-sm transition-all"
 									>
 										Lưu hồ sơ giấy tờ
 										{#if isSubmittingDocs}
@@ -1935,14 +1923,14 @@
 									required
 									rows="4"
 									placeholder="Ví dụ: Đóng tiền trọ muộn 2 hôm / Đăng ký thêm 1 xe máy..."
-									class="w-full rounded-lg border-2 border-black bg-white p-3 text-xs font-semibold text-black focus:outline-none"
+									class="w-full rounded-lg border border-zinc-300 bg-white p-3 text-xs font-semibold text-black focus:outline-none"
 								></textarea>
 
 								<div class="flex justify-end pt-1">
 									<button
 										type="submit"
 										disabled={isSubmittingNote}
-										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-secondary transition-all"
+										class="flex cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-5 py-2.5 text-xs font-black text-black shadow-sm transition-all"
 									>
 										Gửi lời nhắn
 										{#if isSubmittingNote}
@@ -1964,7 +1952,7 @@
 									Chưa gửi lời nhắn nào.
 								</p>
 							{:else}
-								<div class="divide-y divide-black/10">
+								<div class="divide-y divide-zinc-100">
 									{#each notes as note}
 										<div class="space-y-2 py-4">
 											<div class="flex items-center justify-between text-xs">
@@ -1973,13 +1961,13 @@
 												>
 												{#if note.sender === 'LANDLORD'}
 													<span
-														class="rounded-full border border-black bg-blue-300 px-2 py-0.5 text-[9px] font-black text-black"
+														class="rounded-full border border-zinc-300 bg-blue-300 px-2 py-0.5 text-[9px] font-black text-black"
 													>
 														Chủ nhà nhắn
 													</span>
 												{:else}
 													<span
-														class="rounded-full border border-black px-2 py-0.5 text-[9px] font-black {note.isRead
+														class="rounded-full border border-zinc-300 px-2 py-0.5 text-[9px] font-black {note.isRead
 															? 'bg-zinc-100 text-zinc-400'
 															: 'bg-blue-200 text-blue-800'}"
 													>
@@ -1988,7 +1976,7 @@
 												{/if}
 											</div>
 											<p
-												class="border-l-2 border-black py-1 pl-3 text-xs leading-relaxed font-bold text-black"
+												class="border-l border-zinc-200 py-1 pl-3 text-xs leading-relaxed font-bold text-black"
 											>
 												{note.content}
 											</p>
@@ -2001,8 +1989,8 @@
 
 					<!-- 7. CHAT TAB -->
 				{:else if activeTab === 'chat'}
-					<div class="flex flex-col overflow-hidden rounded-lg border border-black/15 bg-white">
-						<div class="flex items-center gap-2 border-b border-black/10 bg-zinc-50 p-4">
+					<div class="flex flex-col overflow-hidden rounded-lg border border-zinc-200 bg-white">
+						<div class="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50 p-4">
 							<MessageSquare class="h-5 w-5 text-black" />
 							<h3 class="text-lg font-black text-black">Chat với chủ nhà</h3>
 						</div>
@@ -2024,7 +2012,7 @@
 									{#each chatMessages as msg (msg.id)}
 										<div class="flex {msg.senderId === userId ? 'justify-end' : 'justify-start'}">
 											<div
-												class="max-w-[75%] rounded-lg border-2 border-black p-2 text-sm font-semibold text-black {msg.senderId ===
+												class="max-w-[75%] rounded-lg border border-zinc-300 p-2 text-sm font-semibold text-black {msg.senderId ===
 												userId
 													? 'bg-blue-300'
 													: 'bg-white'}"
@@ -2045,18 +2033,18 @@
 
 							<form
 								onsubmit={handleSendChat}
-								class="flex items-center gap-2 border-t border-black/10 bg-white p-3"
+								class="flex items-center gap-2 border-t border-zinc-100 bg-white p-3"
 							>
 								<input
 									type="text"
 									bind:value={chatInput}
 									placeholder="Nhập tin nhắn gửi chủ nhà..."
-									class="flex-1 rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
+									class="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 								/>
 								<button
 									type="submit"
 									disabled={isSendingChat || !chatInput.trim()}
-									class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-[6px] border-2 border-black bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-secondary transition-all hover:bg-blue-400 disabled:opacity-50"
+									class="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-blue-300 px-4 py-2 text-xs font-black text-black shadow-sm transition-all hover:bg-blue-400 disabled:opacity-50"
 								>
 									Gửi
 									{#if isSendingChat}
