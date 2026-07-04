@@ -3,6 +3,7 @@
 		Camera,
 		CheckCircle2,
 		ChevronRight,
+		House,
 		UploadCloud,
 		Zap,
 		Droplet,
@@ -54,7 +55,10 @@
 
 					let status = 'pending';
 					let currValue = '';
-					if (thisMonthReading && thisMonthReading.status !== 'rejected') {
+					if (thisMonthReading?.status === 'approved') {
+						status = 'approved';
+						currValue = thisMonthReading.currValue.toString();
+					} else if (thisMonthReading?.status === 'pending') {
 						status = 'submitted';
 						currValue = thisMonthReading.currValue.toString();
 					}
@@ -204,12 +208,27 @@
 			activeMeterId = meter.id;
 		}
 	}
+
+	const allMetersHandled = $derived(
+		pendingMeters.length > 0 && pendingMeters.every((meter) => meter.status !== 'pending')
+	);
+	const allMetersApproved = $derived(
+		pendingMeters.length > 0 && pendingMeters.every((meter) => meter.status === 'approved')
+	);
 </script>
 
 <div class="min-h-screen bg-gray-50 pb-20">
 	<!-- Header -->
 	<div class="bg-white px-5 pt-6 pb-4 shadow-sm">
-		<h1 class="text-xl font-black text-black">Chốt số điện nước</h1>
+		<div class="flex items-center justify-between gap-4">
+			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="h-auto w-28" />
+			<a
+				href="/tenant"
+				class="flex items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-xs font-bold text-black shadow-sm active:scale-[0.98]"
+			>
+				<House class="h-4 w-4" /> Trang chủ
+			</a>
+		</div>
 		<p class="mt-1 text-sm font-medium text-zinc-500">
 			Tháng {new Date().getMonth() + 1}/{new Date().getFullYear()} - P.{roomData?.roomNumber ||
 				'...'}
@@ -228,11 +247,11 @@
 			{#each pendingMeters as meter (meter.id)}
 				<button
 					class="w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-all active:scale-[0.98] {meter.status ===
-					'submitted'
+						'submitted' || meter.status === 'approved'
 						? 'opacity-70 grayscale-[0.5]'
 						: ''}"
 					onclick={() => handleMeterClick(meter)}
-					disabled={meter.status === 'submitted'}
+					disabled={meter.status !== 'pending'}
 				>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-4">
@@ -243,8 +262,12 @@
 							</div>
 							<div>
 								<h3 class="text-lg font-bold text-black">{meter.serviceName}</h3>
-								{#if meter.status === 'submitted'}
+								{#if meter.status === 'approved'}
 									<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-green-600">
+										<CheckCircle2 class="h-4 w-4" /> Đã được duyệt
+									</p>
+								{:else if meter.status === 'submitted'}
+									<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-amber-600">
 										<CheckCircle2 class="h-4 w-4" /> Đã gửi (Chờ duyệt)
 									</p>
 								{:else}
@@ -260,16 +283,20 @@
 				</button>
 			{/each}
 
-			{#if pendingMeters.every((m) => m.status === 'submitted')}
+			{#if allMetersHandled}
 				<div class="px-4 pt-8 text-center">
 					<div
 						class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 text-green-600"
 					>
 						<CheckCircle2 class="h-8 w-8" />
 					</div>
-					<h3 class="text-lg font-bold text-black">Hoàn tất!</h3>
+					<h3 class="text-lg font-bold text-black">
+						{allMetersApproved ? 'Đã chốt xong!' : 'Đã gửi đầy đủ!'}
+					</h3>
 					<p class="mt-2 text-sm text-zinc-500">
-						Bạn đã gửi đầy đủ chỉ số cho tháng này. Chủ nhà sẽ kiểm tra và chốt hóa đơn.
+						{allMetersApproved
+							? 'Chủ nhà đã duyệt đầy đủ chỉ số điện nước tháng này.'
+							: 'Bạn đã gửi đầy đủ chỉ số cho tháng này. Chủ nhà sẽ kiểm tra và chốt hóa đơn.'}
 					</p>
 				</div>
 			{/if}
