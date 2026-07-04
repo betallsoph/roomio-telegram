@@ -11,7 +11,7 @@
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/auth.svelte';
-	import { compressImage, uploadBlobToR2 } from '$lib/upload';
+	import { METER_PHOTO_ASPECT_RATIO, compressImage, uploadBlobToR2 } from '$lib/upload';
 
 	let pendingMeters = $state<any[]>([]);
 	let roomData = $state<any>(null);
@@ -103,7 +103,8 @@
 				const meter = pendingMeters.find((m) => m.id === meterId);
 				const compressedBlob = await compressImage(
 					file,
-					`Phòng ${roomData?.roomNumber || ''} - ${meter?.serviceName || 'Đồng hồ'}`
+					`Phòng ${roomData?.roomNumber || ''} - ${meter?.serviceName || 'Đồng hồ'}`,
+					{ aspectRatio: METER_PHOTO_ASPECT_RATIO }
 				);
 				console.log(
 					`Dung lượng gốc: ${(file.size / 1024).toFixed(1)}KB. Dung lượng nén: ${(compressedBlob.size / 1024).toFixed(1)}KB`
@@ -320,7 +321,7 @@
 
 						{#if activeMeter.photoUrl}
 							<div
-								class="group relative aspect-video w-full overflow-hidden rounded-xl border-2 border-black/5 bg-gray-100"
+								class="group relative mx-auto aspect-[3/4] w-full max-w-sm overflow-hidden rounded-xl border-2 border-black/5 bg-gray-100"
 							>
 								<img src={activeMeter.photoUrl} alt="Đồng hồ" class="h-full w-full object-cover" />
 								<div
@@ -357,7 +358,7 @@
 							</div>
 						{:else}
 							<label
-								class="flex aspect-video w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:bg-zinc-100 active:scale-[0.98]"
+								class="mx-auto flex aspect-[3/4] w-full max-w-sm cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:bg-zinc-100 active:scale-[0.98]"
 							>
 								<div
 									class="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-500"

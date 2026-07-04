@@ -5,6 +5,7 @@
 const MAX_DIMENSION = 1280;
 const JPEG_QUALITY = 0.72;
 const MAX_SOURCE_BYTES = 12 * 1024 * 1024;
+export const METER_PHOTO_ASPECT_RATIO = 3 / 4;
 
 export type UploadPurpose =
 	| 'meter-reading'
@@ -17,6 +18,7 @@ export type UploadPurpose =
 type CompressOptions = {
 	maxDimension?: number;
 	quality?: number;
+	aspectRatio?: number;
 };
 
 function validateImageFile(file: File) {
@@ -54,15 +56,31 @@ export async function compressImage(
 
 	const maxDimension = options.maxDimension ?? MAX_DIMENSION;
 	const quality = options.quality ?? JPEG_QUALITY;
-	const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
-	const width = Math.round(img.width * scale);
-	const height = Math.round(img.height * scale);
+	let sourceX = 0;
+	let sourceY = 0;
+	let sourceWidth = img.width;
+	let sourceHeight = img.height;
+
+	if (options.aspectRatio && options.aspectRatio > 0) {
+		const sourceRatio = img.width / img.height;
+		if (sourceRatio > options.aspectRatio) {
+			sourceWidth = img.height * options.aspectRatio;
+			sourceX = (img.width - sourceWidth) / 2;
+		} else {
+			sourceHeight = img.width / options.aspectRatio;
+			sourceY = (img.height - sourceHeight) / 2;
+		}
+	}
+
+	const scale = Math.min(1, maxDimension / Math.max(sourceWidth, sourceHeight));
+	const width = Math.round(sourceWidth * scale);
+	const height = Math.round(sourceHeight * scale);
 
 	const canvas = document.createElement('canvas');
 	canvas.width = width;
 	canvas.height = height;
 	const ctx = canvas.getContext('2d')!;
-	ctx.drawImage(img, 0, 0, width, height);
+	ctx.drawImage(img, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, width, height);
 
 	if (watermarkLabel) {
 		const stamp = new Date().toLocaleString('vi-VN', { hour12: false });
@@ -150,9 +168,10 @@ export async function uploadBlobToR2(blob: Blob, purpose: UploadPurpose): Promis
 export async function uploadImageToR2(
 	file: File,
 	purpose: UploadPurpose,
-	watermarkLabel?: string
+	watermarkLabel?: string,
+	options: CompressOptions = {}
 ): Promise<string> {
-	const blob = await compressImage(file, watermarkLabel);
+	const blob = await compressImage(file, watermarkLabel, options);
 	return uploadBlobToR2(blob, purpose);
 }
 

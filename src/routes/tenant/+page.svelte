@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { uploadImage, uploadImageToR2 } from '$lib/upload';
+	import { METER_PHOTO_ASPECT_RATIO, uploadImage, uploadImageToR2 } from '$lib/upload';
 	import { authState, clearAuth, setAuthError } from '$lib/auth.svelte';
 	import {
 		Home,
@@ -233,7 +233,9 @@
 		isUploadingMeterPhoto = true;
 		try {
 			const label = `Phòng ${fullRoomData?.roomNumber || ''} - Đồng hồ`;
-			const url = await uploadImageToR2(file, 'meter-reading', label);
+			const url = await uploadImageToR2(file, 'meter-reading', label, {
+				aspectRatio: METER_PHOTO_ASPECT_RATIO
+			});
 			if (url) meterPhotoUrl = url;
 		} catch (err: any) {
 			toast.error(err.message);
@@ -1496,7 +1498,7 @@
 											<img
 												src={meterPhotoUrl}
 												alt="Ảnh đồng hồ vừa chụp"
-												class="mt-2 h-20 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-contain p-1 shadow-secondary"
+												class="mt-2 aspect-[3/4] h-28 animate-[scale-up_0.2s_ease-out] rounded border-2 border-black bg-white object-cover p-1 shadow-secondary"
 											/>
 										{/if}
 									</div>
