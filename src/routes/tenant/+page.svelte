@@ -687,7 +687,7 @@
 		}
 		clearAuth();
 		setAuthError('Bạn đã đăng xuất. Vui lòng mở lại Mini App từ Telegram để đăng nhập.');
-		toast.success('Đã đăng xuất tài khoản cư dân');
+		toast.success('Đã đăng xuất');
 		goto('/');
 	}
 
@@ -768,11 +768,10 @@
 
 	<!-- Top header -->
 	<header
-		class="sticky top-0 z-40 mx-auto flex w-full max-w-4xl shrink-0 items-center justify-between bg-transparent px-5 py-5 text-black sm:px-6"
+		class="sticky top-0 z-40 mx-auto flex w-full max-w-4xl shrink-0 items-center justify-between bg-transparent px-4 py-4 text-black sm:px-6 sm:py-5"
 	>
-		<div class="flex items-center gap-2">
+		<div class="flex items-center">
 			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="h-auto w-32" />
-			<span class="text-xs font-bold text-zinc-500">Cư Dân</span>
 		</div>
 
 		<button onclick={handleLogout} class="roomio-button-white px-3 py-1.5 text-xs">
@@ -785,15 +784,17 @@
 		<div class="relative z-10 flex flex-1 items-center justify-center">
 			<div class="flex flex-col items-center gap-3">
 				<Loader2 class="h-10 w-10 animate-spin text-black" />
-				<p class="text-xs font-bold text-zinc-500">Đang tải cổng thông tin cư dân...</p>
+				<p class="text-xs font-bold text-zinc-500">Đang tải thông tin...</p>
 			</div>
 		</div>
 	{:else}
 		<!-- Shell Wrapper -->
-		<main class="relative z-10 mx-auto w-full max-w-4xl flex-grow space-y-6 px-5 pb-24 sm:px-6">
+		<main
+			class="relative z-10 mx-auto w-full max-w-4xl flex-grow space-y-5 px-4 pb-24 sm:space-y-6 sm:px-6"
+		>
 			<!-- Welcome Header Profile Card - Styled as Brutallist Card -->
 			<div
-				class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-lg border-2 border-black bg-blue-100 p-6 text-black shadow-secondary sm:flex-row sm:items-center"
+				class="relative flex flex-col justify-between gap-4 overflow-hidden rounded-lg border-2 border-black bg-blue-100 p-4 text-black shadow-secondary sm:flex-row sm:items-center sm:p-6"
 			>
 				<div
 					class="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#00000005_1px,transparent_1px),linear-gradient(to_bottom,#00000005_1px,transparent_1px)] bg-[size:16px_16px]"
@@ -806,7 +807,7 @@
 						{tenantName.slice(0, 1).toUpperCase()}
 					</div>
 					<div>
-						<h2 class="text-xl font-black">Chào cư dân, {tenantName}</h2>
+						<h2 class="text-xl font-black">Chào {tenantName}</h2>
 						{#if roomDetails}
 							<p class="mt-1 text-sm font-bold text-zinc-600">
 								{roomDetails.propertyName} — Phòng {roomDetails.roomNumber}
@@ -856,7 +857,7 @@
 
 			<!-- TAB SELECTION: Brutallist style tabs -->
 			<div
-				class="flex shrink-0 scrollbar-none gap-1 overflow-x-auto rounded-lg border-2 border-b-2 border-black bg-white p-1 whitespace-nowrap shadow-sm select-none"
+				class="flex shrink-0 scrollbar-none gap-1 overflow-x-auto border-y-2 border-black bg-white py-1 whitespace-nowrap select-none sm:rounded-lg sm:border-2 sm:p-1 sm:shadow-sm"
 			>
 				<button
 					onclick={() => (activeTab = 'home')}
@@ -1213,7 +1214,7 @@
 				{:else if activeTab === 'request'}
 					<div class="space-y-6">
 						<!-- Create repair ticket form -->
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1221,7 +1222,7 @@
 							</h3>
 
 							<form onsubmit={handleSubmitRequest} class="space-y-4">
-								<div class="grid grid-cols-2 gap-4">
+								<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 									<div class="space-y-1">
 										<label for="req-cat" class="block text-xs font-bold text-zinc-600"
 											>Phân loại kỹ thuật</label
@@ -1327,7 +1328,7 @@
 									</button>
 								</div>
 							</form>
-						</div>
+						</section>
 
 						<!-- Incidents history list -->
 						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
@@ -1399,7 +1400,7 @@
 					<!-- 5. METERS TAB -->
 				{:else if activeTab === 'meters'}
 					<div class="space-y-6">
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1412,7 +1413,7 @@
 								</p>
 							{:else}
 								<form onsubmit={handleSubmitMeter} class="space-y-4">
-									<div class="grid grid-cols-2 gap-4">
+									<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 										<div class="space-y-1">
 											<label for="tenant-m-serv" class="block text-xs font-bold text-zinc-600"
 												>Dịch vụ đo lường</label
@@ -1443,7 +1444,7 @@
 										</div>
 									</div>
 
-									<div class="grid grid-cols-2 gap-4">
+									<div class="grid grid-cols-2 gap-3 sm:gap-4">
 										<div class="space-y-1">
 											<span class="block text-xs font-bold text-zinc-600">Chỉ số cũ (Kỳ trước)</span
 											>
@@ -1517,7 +1518,7 @@
 									</div>
 								</form>
 							{/if}
-						</div>
+						</section>
 
 						<!-- Readings History -->
 						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
@@ -1597,7 +1598,7 @@
 				{:else if activeTab === 'documents'}
 					<div class="space-y-6">
 						<!-- Contract details view -->
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1707,10 +1708,10 @@
 									</p>
 								</div>
 							{/if}
-						</div>
+						</section>
 
 						<!-- Referral: giới thiệu phòng trống cho bạn bè -->
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1750,10 +1751,10 @@
 									Sao chép lời giới thiệu
 								</button>
 							{/if}
-						</div>
+						</section>
 
 						<!-- Documents Upload Form -->
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1930,14 +1931,14 @@
 									</button>
 								</div>
 							</form>
-						</div>
+						</section>
 					</div>
 
 					<!-- 4. SPECIAL NOTES TAB -->
 				{:else if activeTab === 'note'}
 					<div class="space-y-6">
 						<!-- Create note form -->
-						<div class="space-y-4 rounded-lg border-2 border-black bg-white p-5 shadow-secondary">
+						<section class="space-y-4">
 							<h3
 								class="flex items-center gap-2 border-b-2 border-black pb-2 text-base font-black text-black"
 							>
@@ -1972,7 +1973,7 @@
 									</button>
 								</div>
 							</form>
-						</div>
+						</section>
 
 						<!-- Notes list history -->
 						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">

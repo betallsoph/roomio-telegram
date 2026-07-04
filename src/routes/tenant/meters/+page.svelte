@@ -303,7 +303,7 @@
 		</div>
 	{:else if activeMeter}
 		<!-- Form View -->
-		<div class="animate-in slide-in-from-right-4 p-5 duration-200">
+		<div class="animate-in slide-in-from-right-4 px-4 py-5 duration-200 sm:px-5">
 			<button
 				class="mb-4 flex items-center gap-1 text-sm font-bold text-blue-500"
 				onclick={() => (activeMeterId = null)}
@@ -311,7 +311,7 @@
 				&larr; Trở lại
 			</button>
 
-			<div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+			<section>
 				<div class="mb-6 flex items-center gap-3">
 					<div
 						class="h-10 w-10 rounded-lg {activeMeter.bg} {activeMeter.color} flex items-center justify-center"
@@ -323,7 +323,7 @@
 
 				<div class="space-y-6">
 					<!-- Số liệu -->
-					<div class="grid grid-cols-2 gap-4">
+					<div class="grid grid-cols-2 gap-3 sm:gap-4">
 						<div class="rounded-xl border border-gray-100 bg-gray-50 p-4">
 							<p class="mb-1 text-xs font-bold text-zinc-500 uppercase">Đầu kỳ</p>
 							<p class="text-2xl font-black text-black">{activeMeter.prevValue}</p>
@@ -425,7 +425,7 @@
 						</button>
 					</div>
 				</div>
-			</div>
+			</section>
 		</div>
 	{/if}
 </div>
