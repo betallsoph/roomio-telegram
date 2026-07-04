@@ -16,6 +16,13 @@
 		createdAt: string;
 	}
 
+	interface TelegramDelivery {
+		status: 'sent' | 'failed' | 'skipped';
+		delivered: boolean;
+		code?: string;
+		message?: string;
+	}
+
 	let landlordId = $state('');
 	let myUserId = $state('');
 	let tenants = $state<TenantRow[]>([]);
@@ -94,12 +101,26 @@
 			const data = await res.json();
 			if (!res.ok) throw new Error(data.error);
 			draft = '';
+			showTelegramDelivery(data.telegramDelivery);
 			await loadMessages(true);
 		} catch (e) {
 			toast.error(e instanceof Error ? e.message : 'Lỗi gửi tin nhắn');
 		} finally {
 			isSending = false;
 		}
+	}
+
+	function showTelegramDelivery(delivery?: TelegramDelivery | null) {
+		if (!delivery) return;
+		if (delivery.status === 'sent') {
+			toast.success('Đã gửi tin nhắn qua Telegram');
+			return;
+		}
+		if (delivery.code === 'tenant_not_linked') {
+			toast.info('Tin đã lưu, khách chưa liên kết Telegram');
+			return;
+		}
+		toast.error(`Tin đã lưu nhưng Telegram chưa gửi được: ${delivery.message ?? 'lỗi không rõ'}`);
 	}
 
 	function formatTime(value: string) {
