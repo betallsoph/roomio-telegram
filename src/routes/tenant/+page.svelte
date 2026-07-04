@@ -972,56 +972,52 @@
 								</button>
 							</div>
 						{:else}
-							<div
-								class="flex flex-col items-center rounded-lg border-2 border-black bg-white p-6 text-center shadow-secondary"
-							>
-								<CheckCircle2 class="mb-2 h-12 w-12 text-green-500" />
-								<h3 class="text-base font-black text-black">Đã đóng sạch cước phí nhà!</h3>
-								<p class="mt-1 text-xs font-bold text-zinc-500">
-									Cảm ơn bạn! Hệ thống không ghi nhận hóa đơn quá hạn nào.
-								</p>
-							</div>
+							<section class="flex items-center gap-3 border-y-2 border-black py-4">
+								<CheckCircle2 class="h-9 w-9 shrink-0 text-green-500" />
+								<div>
+									<h3 class="text-sm font-black text-black">Đã đóng sạch cước phí nhà!</h3>
+									<p class="mt-1 text-xs font-bold text-zinc-500">
+										Hệ thống không ghi nhận hóa đơn quá hạn nào.
+									</p>
+								</div>
+							</section>
 						{/if}
 
 						<!-- General Help Grid info -->
-						<div class="grid gap-4 sm:grid-cols-2">
-							<div
-								class="flex h-44 flex-col justify-between rounded-lg border-2 border-black bg-white p-5 shadow-secondary"
+						<div
+							class="divide-y-2 divide-black border-y-2 border-black sm:grid sm:grid-cols-2 sm:divide-x-2 sm:divide-y-0"
+						>
+							<button
+								type="button"
+								onclick={() => (activeTab = 'request')}
+								class="flex flex-col gap-2 py-4 text-left sm:pr-5"
 							>
-								<div class="flex items-center gap-2 border-b-2 border-black pb-2">
+								<div class="flex items-center gap-2">
 									<Wrench class="h-5 w-5 text-black" />
 									<span class="text-sm font-black text-black">Gửi báo cáo sự cố</span>
 								</div>
-								<p class="mt-2 text-xs leading-relaxed font-semibold text-zinc-600">
+								<p class="text-xs leading-relaxed font-semibold text-zinc-600">
 									Thiết bị điện nước, nội thất trong phòng gặp sự cố? Gửi yêu cầu đính kèm hình ảnh
 									và mô tả để chủ nhà bố trí thợ xử lý nhanh nhất.
 								</p>
-								<button
-									onclick={() => (activeTab = 'request')}
-									class="mt-3 cursor-pointer border-none bg-transparent p-0 text-left text-xs font-black text-blue-500 hover:underline"
-								>
-									Báo cáo ngay
-								</button>
-							</div>
+								<span class="text-xs font-black text-blue-500">Báo cáo ngay</span>
+							</button>
 
-							<div
-								class="flex h-44 flex-col justify-between rounded-lg border-2 border-black bg-white p-5 shadow-secondary"
+							<button
+								type="button"
+								onclick={() => (activeTab = 'note')}
+								class="flex flex-col gap-2 py-4 text-left sm:pl-5"
 							>
-								<div class="flex items-center gap-2 border-b-2 border-black pb-2">
+								<div class="flex items-center gap-2">
 									<MessageSquare class="h-5 w-5 text-black" />
 									<span class="text-sm font-black text-black">Gửi lời nhắn lưu ý</span>
 								</div>
-								<p class="mt-2 text-xs leading-relaxed font-semibold text-zinc-600">
+								<p class="text-xs leading-relaxed font-semibold text-zinc-600">
 									Bạn có các đề xuất đặc biệt hoặc yêu cầu riêng cần chủ trọ lưu tâm? Gửi lời nhắn
 									lưu ý để chủ nhà lưu giữ cố định tránh trôi tin nhắn.
 								</p>
-								<button
-									onclick={() => (activeTab = 'note')}
-									class="mt-3 cursor-pointer border-none bg-transparent p-0 text-left text-xs font-black text-blue-500 hover:underline"
-								>
-									Soạn lời nhắn
-								</button>
-							</div>
+								<span class="text-xs font-black text-blue-500">Soạn lời nhắn</span>
+							</button>
 						</div>
 					</div>
 
@@ -1145,18 +1141,18 @@
 						{/if}
 
 						<!-- Bills list history -->
-						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
-							<div class="flex items-center gap-2 border-b-2 border-black bg-zinc-100 p-5">
+						<section class="space-y-3">
+							<div class="flex items-center gap-2 border-b-2 border-black pb-3">
 								<Receipt class="h-5 w-5 text-black" />
 								<h3 class="text-lg font-black text-black">Lịch sử hóa đơn</h3>
 							</div>
 
 							{#if invoices.length === 0}
-								<p class="bg-white p-8 text-center text-sm font-bold text-zinc-400">
+								<p class="py-8 text-center text-sm font-bold text-zinc-400">
 									Chưa có hóa đơn nào được tạo.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black bg-white">
+								<div class="divide-y-2 divide-black border-b-2 border-black">
 									{#each invoices as invoice}
 										<div
 											class="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center"
@@ -1207,7 +1203,7 @@
 									{/each}
 								</div>
 							{/if}
-						</div>
+						</section>
 					</div>
 
 					<!-- 3. INCIDENT REPORT TAB -->
@@ -1331,17 +1327,17 @@
 						</section>
 
 						<!-- Incidents history list -->
-						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
-							<div class="border-b-2 border-black bg-zinc-100 p-5">
+						<section class="space-y-3">
+							<div class="border-b-2 border-black pb-3">
 								<h3 class="text-lg font-black text-black">Lịch sử sự cố đã gửi</h3>
 							</div>
 
 							{#if requests.length === 0}
-								<p class="bg-white p-8 text-center text-sm font-bold text-zinc-400">
+								<p class="py-8 text-center text-sm font-bold text-zinc-400">
 									Chưa có sự cố nào được ghi nhận.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black bg-white">
+								<div class="divide-y-2 divide-black border-b-2 border-black">
 									{#each requests as req}
 										<div class="space-y-2 p-4 transition-colors hover:bg-slate-50">
 											<div class="flex items-start justify-between">
@@ -1394,7 +1390,7 @@
 									{/each}
 								</div>
 							{/if}
-						</div>
+						</section>
 					</div>
 
 					<!-- 5. METERS TAB -->
@@ -1521,17 +1517,17 @@
 						</section>
 
 						<!-- Readings History -->
-						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
-							<div class="border-b-2 border-black bg-zinc-100 p-5">
+						<section class="space-y-3">
+							<div class="border-b-2 border-black pb-3">
 								<h3 class="text-lg font-black text-black">Lịch sử tự báo số điện nước</h3>
 							</div>
 
 							{#if !fullRoomData || fullRoomData.meterReadings.length === 0}
-								<p class="bg-white p-8 text-center text-sm font-bold text-zinc-400">
+								<p class="py-8 text-center text-sm font-bold text-zinc-400">
 									Chưa có lịch sử báo số nào.
 								</p>
 							{:else}
-								<div class="overflow-x-auto bg-white">
+								<div class="overflow-x-auto border-b-2 border-black">
 									<table class="w-full border-collapse text-left text-xs">
 										<thead>
 											<tr class="border-b-2 border-black bg-zinc-50 font-black text-zinc-600">
@@ -1591,7 +1587,7 @@
 									</table>
 								</div>
 							{/if}
-						</div>
+						</section>
 					</div>
 
 					<!-- 6. DOCUMENTS & LEASE TAB -->
@@ -1607,16 +1603,18 @@
 
 							{#if activeContract}
 								<!-- Hợp đồng chính thức đang hiệu lực -->
-								<div class="grid grid-cols-1 gap-4 text-sm font-semibold text-black md:grid-cols-2">
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+								<div
+									class="grid grid-cols-1 gap-x-6 text-sm font-semibold text-black md:grid-cols-2"
+								>
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Ngày bắt đầu</p>
 										<p class="mt-1 text-base font-black text-black">
 											{new Date(activeContract.startDate).toLocaleDateString('vi-VN')}
 										</p>
 									</div>
 									<div
-										class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary {contractExpiringSoon()
-											? 'bg-red-200'
+										class="border-b border-black/20 py-3 {contractExpiringSoon()
+											? 'bg-red-100 px-3'
 											: ''}"
 									>
 										<p class="text-xs font-black text-zinc-500">Ngày kết thúc</p>
@@ -1634,13 +1632,13 @@
 											{/if}
 										</p>
 									</div>
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền thuê hàng tháng</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{formatCurrency(activeContract.monthlyRent)}
 										</p>
 									</div>
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(activeContract.deposit)}
@@ -1660,9 +1658,7 @@
 									</a>
 								{/if}
 
-								<div
-									class="space-y-1 rounded-lg border-2 border-black bg-white p-4 shadow-secondary"
-								>
+								<div class="space-y-1 border-l-2 border-black py-1 pl-3">
 									<span class="block text-xs font-black text-zinc-500"
 										>Ghi chú & Thỏa thuận hợp đồng</span
 									>
@@ -1674,8 +1670,10 @@
 								</div>
 							{:else}
 								<!-- Fallback: hiển thị thông tin từ hồ sơ khi chưa có hợp đồng chính thức -->
-								<div class="grid grid-cols-1 gap-4 text-sm font-semibold text-black md:grid-cols-3">
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+								<div
+									class="grid grid-cols-1 gap-x-6 text-sm font-semibold text-black md:grid-cols-3"
+								>
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Ngày dọn vào</p>
 										<p class="mt-1 text-base font-black text-black">
 											{tenantMoveInDate
@@ -1683,13 +1681,13 @@
 												: '--'}
 										</p>
 									</div>
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Tiền cọc giữ chỗ</p>
 										<p class="mt-1 text-base font-black text-green-600">
 											{formatCurrency(tenantDeposit)}
 										</p>
 									</div>
-									<div class="rounded-lg border-2 border-black bg-white p-4 shadow-secondary">
+									<div class="border-b border-black/20 py-3">
 										<p class="text-xs font-black text-zinc-500">Phòng đang thuê</p>
 										<p class="mt-1 text-base font-black text-blue-600">
 											{roomDetails ? `Phòng ${roomDetails.roomNumber}` : 'Chưa xếp'}
@@ -1697,9 +1695,7 @@
 									</div>
 								</div>
 
-								<div
-									class="space-y-1 rounded-lg border-2 border-black bg-white p-4 shadow-secondary"
-								>
+								<div class="space-y-1 border-l-2 border-black py-1 pl-3">
 									<span class="block text-xs font-black text-zinc-500"
 										>Ghi chú & Thỏa thuận hợp đồng</span
 									>
@@ -1723,13 +1719,9 @@
 									Hiện tòa nhà không còn phòng trống nào.
 								</p>
 							{:else}
-								<div
-									class="divide-y-2 divide-black overflow-hidden rounded-lg border-2 border-black"
-								>
+								<div class="divide-y-2 divide-black border-y-2 border-black">
 									{#each emptyRooms as room}
-										<div
-											class="flex items-center justify-between gap-3 bg-white p-3 transition-colors hover:bg-slate-50"
-										>
+										<div class="flex items-center justify-between gap-3 py-3">
 											<div>
 												<p class="text-sm font-black text-black">Phòng {room.roomNumber}</p>
 												<p class="mt-0.5 text-[10px] font-bold text-zinc-500">
@@ -1976,24 +1968,19 @@
 						</section>
 
 						<!-- Notes list history -->
-						<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
-							<div class="border-b-2 border-black bg-zinc-100 p-5">
+						<section class="space-y-3">
+							<div class="border-b-2 border-black pb-3">
 								<h3 class="text-lg font-black text-black">Lời nhắn đã gửi</h3>
 							</div>
 
 							{#if notes.length === 0}
-								<p class="bg-white p-8 text-center text-sm font-bold text-zinc-400">
+								<p class="py-8 text-center text-sm font-bold text-zinc-400">
 									Chưa gửi lời nhắn nào.
 								</p>
 							{:else}
-								<div class="divide-y-2 divide-black bg-white">
+								<div class="divide-y-2 divide-black border-b-2 border-black">
 									{#each notes as note}
-										<div
-											class="space-y-2 p-4 transition-colors hover:bg-slate-50 {note.sender ===
-											'LANDLORD'
-												? 'bg-blue-100'
-												: ''}"
-										>
+										<div class="space-y-2 py-4">
 											<div class="flex items-center justify-between text-xs">
 												<span class="font-bold text-zinc-400"
 													>{new Date(note.createdAt).toLocaleString('vi-VN')}</span
@@ -2015,10 +2002,7 @@
 												{/if}
 											</div>
 											<p
-												class="rounded-lg border-2 border-black p-2.5 text-xs leading-relaxed font-bold text-black {note.sender ===
-												'LANDLORD'
-													? 'bg-white'
-													: 'bg-zinc-50'}"
+												class="border-l-2 border-black py-1 pl-3 text-xs leading-relaxed font-bold text-black"
 											>
 												{note.content}
 											</p>
@@ -2026,7 +2010,7 @@
 									{/each}
 								</div>
 							{/if}
-						</div>
+						</section>
 					</div>
 
 					<!-- 7. CHAT TAB -->
