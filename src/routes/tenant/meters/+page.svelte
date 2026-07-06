@@ -102,7 +102,6 @@
 		if (input.files && input.files[0]) {
 			const file = input.files[0];
 
-			toast.info('Đang nén ảnh...');
 			try {
 				const meter = pendingMeters.find((m) => m.id === meterId);
 				const compressedBlob = await compressImage(
@@ -124,9 +123,6 @@
 					pendingMeters[idx].photoUrl = previewUrl;
 					(pendingMeters[idx] as any).compressedBlob = compressedBlob;
 				}
-				toast.success(
-					`Nén ảnh siêu nhẹ thành công! (${(compressedBlob.size / 1024).toFixed(0)}KB)`
-				);
 			} catch (error: any) {
 				toast.error(error.message || 'Lỗi khi nén ảnh');
 				console.error(error);
