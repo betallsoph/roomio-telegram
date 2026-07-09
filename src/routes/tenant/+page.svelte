@@ -460,9 +460,6 @@
 
 				// Fetch announcements (đủ phạm vi: tòa nhà / block / phòng / đích danh khách)
 				fetchAnnouncements(fullRoomData.propertyId, fullRoomData.blockId, fullRoomData.id);
-
-				// Fetch empty rooms cùng tòa để giới thiệu bạn bè
-				fetchEmptyRooms(fullRoomData.propertyId);
 			}
 
 			// 2. Fetch invoices
@@ -482,23 +479,6 @@
 					};
 					fetchAnnouncements(firstInv.room.property.id);
 				}
-			}
-
-			// 3. Fetch maintenance requests
-			const reqRes = await fetch('/api/requests');
-			const reqData = await reqRes.json();
-			if (reqRes.ok) requests = reqData;
-
-			// 4. Fetch special notes
-			const notesRes = await fetch('/api/notifications');
-			const notesData = await notesRes.json();
-			if (notesRes.ok) notes = notesData;
-
-			// 5. Fetch contracts (lấy hợp đồng đang hiệu lực nếu có)
-			const contractRes = await fetch('/api/contracts');
-			const contractData = await contractRes.json();
-			if (contractRes.ok && Array.isArray(contractData)) {
-				activeContract = contractData.find((c: Contract) => c.status === 'active') || null;
 			}
 		} catch (e: any) {
 			toast.error('Lỗi khi tải thông tin: ' + e.message);
@@ -705,6 +685,14 @@
 		return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
 	}
 
+	function getMeteredServiceConfigs() {
+		return fullRoomData?.services?.filter((s: any) => s.service.type === 'METERED') ?? [];
+	}
+
+	function getRecentInvoices(limit = 3) {
+		return invoices.slice(0, limit);
+	}
+
 	const pendingInvoice = $derived(() => {
 		return invoices.find((inv) => inv.status !== 'paid');
 	});
@@ -866,15 +854,6 @@
 					Hóa đơn ({invoices.length})
 				</button>
 				<button
-					onclick={() => (activeTab = 'request')}
-					class="min-w-[100px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
-					'request'
-						? 'bg-white text-black shadow-sm'
-						: 'text-zinc-500 hover:bg-white/60'}"
-				>
-					Báo sự cố ({requests.length})
-				</button>
-				<button
 					onclick={() => (activeTab = 'meters')}
 					class="min-w-[120px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
 					'meters'
@@ -882,33 +861,6 @@
 						: 'text-zinc-500 hover:bg-white/60'}"
 				>
 					Báo điện nước
-				</button>
-				<button
-					onclick={() => (activeTab = 'documents')}
-					class="min-w-[130px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
-					'documents'
-						? 'bg-white text-black shadow-sm'
-						: 'text-zinc-500 hover:bg-white/60'}"
-				>
-					Giấy tờ & Hợp đồng
-				</button>
-				<button
-					onclick={() => (activeTab = 'note')}
-					class="min-w-[100px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
-					'note'
-						? 'bg-white text-black shadow-sm'
-						: 'text-zinc-500 hover:bg-white/60'}"
-				>
-					Lời nhắn
-				</button>
-				<button
-					onclick={() => (activeTab = 'chat')}
-					class="min-w-[80px] flex-grow cursor-pointer rounded-[6px] py-2 text-xs font-black transition-all {activeTab ===
-					'chat'
-						? 'bg-white text-black shadow-sm'
-						: 'text-zinc-500 hover:bg-white/60'}"
-				>
-					Chat
 				</button>
 			</div>
 
@@ -971,40 +923,83 @@
 							</section>
 						{/if}
 
-						<!-- General Help Grid info -->
-						<div class="grid gap-2 sm:grid-cols-2 sm:gap-8">
+						<div class="grid gap-3 sm:grid-cols-2">
 							<button
 								type="button"
-								onclick={() => (activeTab = 'request')}
-								class="flex flex-col gap-2 py-4 text-left sm:pr-5"
+								onclick={() => (activeTab = 'bills')}
+								class="rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm active:scale-[0.99]"
 							>
 								<div class="flex items-center gap-2">
-									<Wrench class="h-5 w-5 text-black" />
-									<span class="text-sm font-black text-black">Gửi báo cáo sự cố</span>
+									<Receipt class="h-5 w-5 text-black" />
+									<span class="text-sm font-black text-black">Tiền các tháng trước</span>
 								</div>
-								<p class="text-xs leading-relaxed font-semibold text-zinc-600">
-									Thiết bị điện nước, nội thất trong phòng gặp sự cố? Gửi yêu cầu đính kèm hình ảnh
-									và mô tả để chủ nhà bố trí thợ xử lý nhanh nhất.
+								<p class="mt-2 text-xs leading-relaxed font-semibold text-zinc-600">
+									Xem lại hóa đơn, từng khoản tiền phòng, điện nước và trạng thái đã đóng.
 								</p>
-								<span class="text-xs font-black text-blue-500">Báo cáo ngay</span>
+								<span class="mt-3 inline-block text-xs font-black text-blue-500">Xem hóa đơn</span>
 							</button>
 
 							<button
 								type="button"
-								onclick={() => (activeTab = 'note')}
-								class="flex flex-col gap-2 py-4 text-left sm:pl-5"
+								onclick={() => (activeTab = 'meters')}
+								class="rounded-xl border border-zinc-200 bg-white p-4 text-left shadow-sm active:scale-[0.99]"
 							>
 								<div class="flex items-center gap-2">
-									<MessageSquare class="h-5 w-5 text-black" />
-									<span class="text-sm font-black text-black">Gửi lời nhắn lưu ý</span>
+									<Zap class="h-5 w-5 text-black" />
+									<span class="text-sm font-black text-black">Điện nước tháng này</span>
 								</div>
-								<p class="text-xs leading-relaxed font-semibold text-zinc-600">
-									Bạn có các đề xuất đặc biệt hoặc yêu cầu riêng cần chủ trọ lưu tâm? Gửi lời nhắn
-									lưu ý để chủ nhà lưu giữ cố định tránh trôi tin nhắn.
-								</p>
-								<span class="text-xs font-black text-blue-500">Soạn lời nhắn</span>
+								{#if getMeteredServiceConfigs().length > 0}
+									<p class="mt-2 text-xs leading-relaxed font-semibold text-zinc-600">
+										Phòng có {getMeteredServiceConfigs().length} dịch vụ cần gửi chỉ số kèm ảnh đồng hồ.
+									</p>
+									<span class="mt-3 inline-block text-xs font-black text-blue-500">Gửi chỉ số</span>
+								{:else}
+									<p class="mt-2 text-xs leading-relaxed font-semibold text-zinc-600">
+										Điện nước đang tính khoán hàng tháng, bạn không cần chụp đồng hồ.
+									</p>
+									<span class="mt-3 inline-block text-xs font-black text-zinc-400"
+										>Không cần gửi</span
+									>
+								{/if}
 							</button>
 						</div>
+
+						{#if getRecentInvoices().length > 0}
+							<section class="space-y-2 pt-1">
+								<div class="flex items-center justify-between">
+									<h3 class="text-sm font-black text-black">Gần đây</h3>
+									<button
+										type="button"
+										onclick={() => (activeTab = 'bills')}
+										class="text-xs font-black text-blue-500"
+									>
+										Xem tất cả
+									</button>
+								</div>
+								<div class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white">
+									{#each getRecentInvoices() as invoice}
+										<button
+											type="button"
+											onclick={() => {
+												activeTab = 'bills';
+												if (invoice.status !== 'paid') openPayment(invoice);
+											}}
+											class="flex w-full items-center justify-between gap-3 p-3 text-left"
+										>
+											<div>
+												<p class="text-sm font-black text-black">Tháng {invoice.month}</p>
+												<p class="mt-0.5 text-[10px] font-bold text-zinc-500">
+													{invoice.status === 'paid' ? 'Đã đóng' : 'Chưa đóng'}
+												</p>
+											</div>
+											<span class="text-sm font-black text-black"
+												>{formatCurrency(invoice.totalAmount)}</span
+											>
+										</button>
+									{/each}
+								</div>
+							</section>
+						{/if}
 					</div>
 
 					<!-- 2. BILLS TAB -->
@@ -1389,6 +1384,17 @@
 								<p class="py-4 text-center text-xs font-bold text-zinc-500">
 									Không tìm thấy thông tin phòng để ghi chỉ số.
 								</p>
+							{:else if getMeteredServiceConfigs().length === 0}
+								<div class="py-10 text-center">
+									<CheckCircle2 class="mx-auto h-10 w-10 text-blue-500" />
+									<h4 class="mt-3 text-base font-black text-black">Điện nước đang tính khoán</h4>
+									<p
+										class="mx-auto mt-2 max-w-sm text-xs leading-relaxed font-semibold text-zinc-500"
+									>
+										Chủ trọ đang thu các khoản này theo gói hàng tháng, nên bạn không cần chụp ảnh
+										đồng hồ hay gửi chỉ số.
+									</p>
+								</div>
 							{:else}
 								<form onsubmit={handleSubmitMeter} class="space-y-4">
 									<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -1403,7 +1409,7 @@
 												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 											>
 												<option value="">-- Chọn dịch vụ --</option>
-												{#each fullRoomData.services.filter((s: any) => s.service.type === 'METERED') as c}
+												{#each getMeteredServiceConfigs() as c}
 													<option value={c.serviceId}>{c.service.name}</option>
 												{/each}
 											</select>

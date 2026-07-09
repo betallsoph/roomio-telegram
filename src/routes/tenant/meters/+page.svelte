@@ -240,44 +240,59 @@
 	{:else if !activeMeterId}
 		<!-- List View -->
 		<div class="space-y-4 p-5">
-			{#each pendingMeters as meter (meter.id)}
-				<button
-					class="w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-all active:scale-[0.98] {meter.status ===
-						'submitted' || meter.status === 'approved'
-						? 'opacity-70 grayscale-[0.5]'
-						: ''}"
-					onclick={() => handleMeterClick(meter)}
-					disabled={meter.status !== 'pending'}
-				>
-					<div class="flex items-center justify-between">
-						<div class="flex items-center gap-4">
-							<div
-								class="h-12 w-12 rounded-xl {meter.bg} {meter.color} flex items-center justify-center"
-							>
-								<meter.icon class="h-6 w-6" />
-							</div>
-							<div>
-								<h3 class="text-lg font-bold text-black">{meter.serviceName}</h3>
-								{#if meter.status === 'approved'}
-									<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-green-600">
-										<CheckCircle2 class="h-4 w-4" /> Đã được duyệt
-									</p>
-								{:else if meter.status === 'submitted'}
-									<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-amber-600">
-										<CheckCircle2 class="h-4 w-4" /> Đã gửi (Chờ duyệt)
-									</p>
-								{:else}
-									<p class="mt-0.5 text-sm font-medium text-zinc-500">Số cũ: {meter.prevValue}</p>
-								{/if}
-							</div>
-						</div>
-
-						{#if meter.status === 'pending'}
-							<ChevronRight class="h-5 w-5 text-zinc-400" />
-						{/if}
+			{#if pendingMeters.length === 0}
+				<div class="px-4 pt-10 text-center">
+					<div
+						class="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 text-blue-600"
+					>
+						<CheckCircle2 class="h-8 w-8" />
 					</div>
-				</button>
-			{/each}
+					<h3 class="text-lg font-bold text-black">Điện nước đang tính khoán</h3>
+					<p class="mt-2 text-sm text-zinc-500">
+						Phòng này không có dịch vụ cần chụp đồng hồ trong tháng. Khi chủ trọ bật tính theo chỉ
+						số, mục gửi ảnh đồng hồ sẽ tự hiện ở đây.
+					</p>
+				</div>
+			{:else}
+				{#each pendingMeters as meter (meter.id)}
+					<button
+						class="w-full rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-all active:scale-[0.98] {meter.status ===
+							'submitted' || meter.status === 'approved'
+							? 'opacity-70 grayscale-[0.5]'
+							: ''}"
+						onclick={() => handleMeterClick(meter)}
+						disabled={meter.status !== 'pending'}
+					>
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-4">
+								<div
+									class="h-12 w-12 rounded-xl {meter.bg} {meter.color} flex items-center justify-center"
+								>
+									<meter.icon class="h-6 w-6" />
+								</div>
+								<div>
+									<h3 class="text-lg font-bold text-black">{meter.serviceName}</h3>
+									{#if meter.status === 'approved'}
+										<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-green-600">
+											<CheckCircle2 class="h-4 w-4" /> Đã được duyệt
+										</p>
+									{:else if meter.status === 'submitted'}
+										<p class="mt-0.5 flex items-center gap-1 text-sm font-medium text-amber-600">
+											<CheckCircle2 class="h-4 w-4" /> Đã gửi (Chờ duyệt)
+										</p>
+									{:else}
+										<p class="mt-0.5 text-sm font-medium text-zinc-500">Số cũ: {meter.prevValue}</p>
+									{/if}
+								</div>
+							</div>
+
+							{#if meter.status === 'pending'}
+								<ChevronRight class="h-5 w-5 text-zinc-400" />
+							{/if}
+						</div>
+					</button>
+				{/each}
+			{/if}
 
 			{#if allMetersHandled}
 				<div class="px-4 pt-8 text-center">
