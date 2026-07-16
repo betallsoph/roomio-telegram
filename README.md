@@ -8,6 +8,32 @@ MVP đang theo hướng **landlord-first**: ưu tiên dashboard chủ trọ đ�
 
 Route `/tenant` hiện chỉ xem như prototype/Phase 2 cho khách thuê tự phục vụ. Không ưu tiên phát triển thêm tenant portal cho tới khi luồng chủ trọ ổn định.
 
+## Hai trục phân loại
+
+TMA dùng cùng quy ước domain với `roomio-web`; label và option đọc từ `src/lib/rental-types.ts`. Hai trục độc lập, gắn với **Property** (cụm quản lý).
+
+### Trục A — `rentalType` (ảnh hưởng giá và hạn mức)
+
+| Mã DB | Nhãn tiếng Việt | Nhóm giá |
+| ----- | ---------------- | -------- |
+| `APARTMENT` | Share phòng chung cư / Co-living | Co-living |
+| `MOTEL` | Phòng trọ truyền thống / Căn hộ dịch vụ | Tiêu chuẩn |
+| `DORM` | KTX / Sleepbox | Tiêu chuẩn |
+| `WHOLE_UNIT` | Căn hộ chung cư nguyên căn / Nhà nguyên căn | Tiêu chuẩn |
+
+Allowlist loại hình: `LandlordProfile.enabledRentalTypes`. Hạn mức thương lượng: `subscribedStandardRoomLimit` / `subscribedColivingRoomLimit`.
+
+### Trục B — `operatingModel` (metadata, không ảnh hưởng giá)
+
+| Mã DB | Nhãn tiếng Việt |
+| ----- | ---------------- |
+| `UNSPECIFIED` | Chưa phân loại (mặc định) |
+| `OWNED` | Tự sở hữu |
+| `RENT_TO_RENT` | Thuê lại để cho thuê |
+| `MANAGED` | Quản lý hộ chủ nhà |
+
+TMA hiện đồng bộ option loại hình với web; trục B chưa có UI riêng trên TMA — API vẫn nhận/lưu field khi client gửi.
+
 ## Công nghệ
 
 - SvelteKit 2 (Svelte 5, runes) → `@sveltejs/adapter-static` (SPA, `ssr=false`)
