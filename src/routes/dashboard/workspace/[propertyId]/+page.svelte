@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
+	import { canonicalRentalType } from '$lib/rental-types';
 	import {
 		ArrowLeft,
 		ArrowRight,
@@ -67,20 +68,20 @@
 		}
 	> = {
 		APARTMENT: {
-			label: 'Chung cư',
-			unitLabel: 'Căn / phòng',
+			label: 'Co-living',
+			unitLabel: 'Phòng share',
 			groupLabel: 'Block',
-			primaryAction: 'Quản lý căn hộ',
+			primaryAction: 'Quản lý co-living',
 			workflows: [
 				'Sơ đồ căn theo block/tầng',
-				'Hợp đồng theo căn',
-				'Tài sản bàn giao',
-				'Phí quản lý và dịch vụ tòa nhà'
+				'Share phòng trong cùng căn',
+				'Hợp đồng theo phòng',
+				'Tài sản bàn giao theo phòng'
 			],
-			billing: ['Tiền thuê căn', 'Điện nước theo chỉ số', 'Phí quản lý / gửi xe / dịch vụ']
+			billing: ['Tiền thuê phòng', 'Điện nước theo chỉ số', 'Phí quản lý / gửi xe / dịch vụ']
 		},
 		MOTEL: {
-			label: 'Phòng trọ',
+			label: 'Trọ / CHDV',
 			unitLabel: 'Phòng',
 			groupLabel: 'Dãy',
 			primaryAction: 'Quản lý phòng trọ',
@@ -91,19 +92,6 @@
 				'Theo dõi nợ theo phòng'
 			],
 			billing: ['Tiền phòng', 'Điện nước', 'Rác / wifi / gửi xe theo phòng, người hoặc xe']
-		},
-		SERVICED_APARTMENT: {
-			label: 'Căn hộ dịch vụ',
-			unitLabel: 'Căn dịch vụ',
-			groupLabel: 'Tầng / khu',
-			primaryAction: 'Quản lý căn dịch vụ',
-			workflows: [
-				'Lịch dọn phòng',
-				'Nội thất và ảnh bàn giao',
-				'Dịch vụ giặt ủi / vệ sinh',
-				'Hợp đồng ngắn hoặc trung hạn'
-			],
-			billing: ['Tiền thuê căn', 'Dịch vụ cộng thêm', 'Điện nước hoặc gói trọn']
 		},
 		DORM: {
 			label: 'KTX / Sleepbox',
@@ -122,6 +110,19 @@
 				'Cọc chìa khóa / thẻ / locker'
 			],
 			note: 'Hiện tại hệ thống vẫn dùng phòng làm đơn vị tạm cho KTX/Sleepbox. Bước tiếp theo sẽ tách thêm Bed/Box dưới Room.'
+		},
+		WHOLE_UNIT: {
+			label: 'Nguyên căn',
+			unitLabel: 'Căn / nhà',
+			groupLabel: 'Cụm / dự án',
+			primaryAction: 'Quản lý nguyên căn',
+			workflows: [
+				'Danh mục căn hộ / nhà nguyên căn',
+				'Hợp đồng theo từng căn/nhà',
+				'Tài sản bàn giao theo căn',
+				'Theo dõi trạng thái thuê từng căn'
+			],
+			billing: ['Tiền thuê căn/nhà', 'Điện nước theo chỉ số', 'Phí quản lý / dịch vụ theo căn']
 		}
 	};
 
@@ -159,7 +160,8 @@
 	}
 
 	function meta() {
-		return WORKSPACE_META[property?.rentalType ?? 'APARTMENT'] ?? WORKSPACE_META.APARTMENT;
+		const type = canonicalRentalType(property?.rentalType ?? 'APARTMENT');
+		return WORKSPACE_META[type] ?? WORKSPACE_META.APARTMENT;
 	}
 
 	function formatCurrency(amount: number) {
