@@ -4,6 +4,12 @@
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
 	import {
+		blockLabel as blockLabelForType,
+		canonicalRentalType,
+		propertyHeadingLabel,
+		roomCodeLabel as roomCodeLabelForType
+	} from '$lib/rental-types';
+	import {
 		Home,
 		Building2,
 		Plus,
@@ -458,30 +464,19 @@
 	}
 
 	function activeRentalType() {
-		return getActiveProperty()?.rentalType ?? 'APARTMENT';
+		return canonicalRentalType(getActiveProperty()?.rentalType ?? 'APARTMENT');
 	}
 
 	function propertyLabel() {
-		const type = activeRentalType();
-		if (type === 'MOTEL') return 'Khu trọ';
-		if (type === 'SERVICED_APARTMENT') return 'Căn hộ dịch vụ';
-		if (type === 'DORM') return 'KTX / Sleepbox';
-		return 'Tòa nhà';
+		return propertyHeadingLabel(activeRentalType());
 	}
 
 	function blockLabel() {
-		const type = activeRentalType();
-		if (type === 'MOTEL') return 'Dãy';
-		if (type === 'SERVICED_APARTMENT') return 'Tầng / khu';
-		if (type === 'DORM') return 'Phòng / khu';
-		return 'Block';
+		return blockLabelForType(activeRentalType());
 	}
 
 	function roomCodeLabel() {
-		const type = activeRentalType();
-		if (type === 'MOTEL') return 'Mã phòng';
-		if (type === 'DORM') return 'Mã giường / box';
-		return 'Mã căn hộ';
+		return roomCodeLabelForType(activeRentalType());
 	}
 
 	function formatCurrency(amount: number) {

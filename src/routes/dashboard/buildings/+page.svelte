@@ -2,6 +2,16 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
+	import {
+		RENTAL_TYPE_OPTIONS,
+		blockLabel,
+		isApartmentRentalType,
+		parseRentalTypes,
+		propertyLabel,
+		propertyNamePlaceholder,
+		blockPlaceholder,
+		rentalTypeLabel
+	} from '$lib/rental-types';
 	import { Building2, Plus, X, MapPin, Home, Trash2, Loader2 } from '@lucide/svelte';
 
 	interface Block {
@@ -45,12 +55,6 @@
 	let rentalType = $state('APARTMENT');
 	let isSubmitting = $state(false);
 	const TAP_ACTION_DELAY = 200;
-	const RENTAL_TYPE_OPTIONS = [
-		{ value: 'APARTMENT', label: 'Chung cư' },
-		{ value: 'MOTEL', label: 'Phòng trọ' },
-		{ value: 'SERVICED_APARTMENT', label: 'Căn hộ dịch vụ' },
-		{ value: 'DORM', label: 'KTX / Sleepbox' }
-	];
 
 	onMount(() => {
 		const sessionStr = localStorage.getItem('roomio_user');
@@ -64,46 +68,6 @@
 		fetchSettings();
 		fetchProperties(session.landlordProfileId);
 	});
-
-	function parseRentalTypes(value: string | null | undefined) {
-		const parsed = (value || 'APARTMENT')
-			.split(',')
-			.map((type) => type.trim())
-			.filter(Boolean);
-		return parsed.length > 0 ? parsed : ['APARTMENT'];
-	}
-
-	function rentalTypeLabel(type: string) {
-		return RENTAL_TYPE_OPTIONS.find((option) => option.value === type)?.label ?? type;
-	}
-
-	function propertyLabel(type = rentalType) {
-		if (type === 'MOTEL') return 'khu trọ';
-		if (type === 'SERVICED_APARTMENT') return 'cơ sở căn hộ dịch vụ';
-		if (type === 'DORM') return 'khu KTX / sleepbox';
-		return 'tòa nhà';
-	}
-
-	function blockLabel(type = rentalType) {
-		if (type === 'MOTEL') return 'Dãy';
-		if (type === 'SERVICED_APARTMENT') return 'Tầng / khu';
-		if (type === 'DORM') return 'Phòng / khu';
-		return 'Block';
-	}
-
-	function propertyNamePlaceholder(type = rentalType) {
-		if (type === 'MOTEL') return 'Ví dụ: Khu trọ An Bình';
-		if (type === 'SERVICED_APARTMENT') return 'Ví dụ: CHDV Nguyễn Trãi';
-		if (type === 'DORM') return 'Ví dụ: Sleepbox Cầu Giấy';
-		return 'Ví dụ: Hoàng Anh Gia Lai';
-	}
-
-	function blockPlaceholder(type = rentalType) {
-		if (type === 'MOTEL') return 'Ví dụ: Dãy A, Dãy B, Dãy sau';
-		if (type === 'SERVICED_APARTMENT') return 'Ví dụ: Tầng 1, Tầng 2, Khu sau';
-		if (type === 'DORM') return 'Ví dụ: Phòng nam, Phòng nữ, Khu yên tĩnh';
-		return 'Ví dụ: Block A, Block B';
-	}
 
 	async function fetchSettings() {
 		try {
@@ -146,6 +110,11 @@
 			.split(',')
 			.map((b) => b.trim())
 			.filter(Boolean);
+		if (isApartmentRentalType(rentalType) && blocksArray.length === 0) {
+			toast.error('Co-living cần có ít nhất một block');
+			isSubmitting = false;
+			return;
+		}
 
 		try {
 			const res = await fetch('/api/properties', {
@@ -497,12 +466,13 @@
 
 					<div class="space-y-1">
 						<label for="p-blocks" class="block text-xs font-bold text-zinc-600"
-							>{blockLabel(rentalType)} (tùy chọn)</label
+							>{blockLabel(rentalType)}{isApartmentRentalType(rentalType) ? '' : ' (tùy chọn)'}</label
 						>
 						<input
 							id="p-blocks"
 							type="text"
 							bind:value={blocksText}
+							required={isApartmentRentalType(rentalType)}
 							placeholder={blockPlaceholder(rentalType)}
 							class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-semibold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 						/>

@@ -4,6 +4,11 @@
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
 	import {
+		RENTAL_TYPE_OPTIONS,
+		parseRentalTypes,
+		rentalTypeLabel
+	} from '$lib/rental-types';
+	import {
 		Check,
 		Eye,
 		Loader2,
@@ -86,13 +91,6 @@
 		subValidUntil: '',
 		enabledRentalTypes: ['APARTMENT']
 	});
-
-	const RENTAL_TYPE_OPTIONS = [
-		{ value: 'APARTMENT', label: 'Chung cư' },
-		{ value: 'MOTEL', label: 'Phòng trọ' },
-		{ value: 'SERVICED_APARTMENT', label: 'Căn hộ dịch vụ' },
-		{ value: 'DORM', label: 'KTX / Sleepbox' }
-	];
 
 	onMount(() => {
 		const sessionStr = localStorage.getItem('roomio_user');
@@ -336,18 +334,10 @@
 		return 'bg-green-100 text-green-800';
 	}
 
-	function parseRentalTypes(value: string | null | undefined) {
-		const parsed = (value || 'APARTMENT')
-			.split(',')
-			.map((type) => type.trim())
-			.filter(Boolean);
-		return parsed.length > 0 ? parsed : ['APARTMENT'];
-	}
-
 	function rentalTypesLabel(value: string | null | undefined) {
 		const enabled = parseRentalTypes(value);
 		return RENTAL_TYPE_OPTIONS.filter((option) => enabled.includes(option.value))
-			.map((option) => option.label)
+			.map((option) => rentalTypeLabel(option.value))
 			.join(', ');
 	}
 
