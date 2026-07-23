@@ -154,6 +154,9 @@
 	let meterPrev = $state<number>(0);
 	let meterCurr = $state('');
 	let meterPhotoUrl = $state('');
+	let meterOcrParsedValue = $state<number | null>(null);
+	let isParsingMeterOcr = $state(false);
+	let meterOcrUnavailable = $state(false);
 	let isSubmittingMeter = $state(false);
 	let isUploadingMeterPhoto = $state(false);
 
@@ -225,18 +228,56 @@
 		}
 	}
 
+	function resetMeterOcrState() {
+		meterOcrParsedValue = null;
+		meterOcrUnavailable = false;
+		isParsingMeterOcr = false;
+	}
+
+	async function parseMeterPhoto(photoUrl: string) {
+		resetMeterOcrState();
+		isParsingMeterOcr = true;
+		try {
+			const res = await fetch('/api/meter-readings/parse', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ photoUrl })
+			});
+
+			if (res.status === 503) {
+				meterOcrUnavailable = true;
+				return;
+			}
+
+			const data = await res.json();
+			if (!res.ok) return;
+
+			if (typeof data.value === 'number' && Number.isFinite(data.value)) {
+				meterOcrParsedValue = data.value;
+			}
+		} catch {
+			// Không chặn luồng gửi chỉ số nếu OCR lỗi
+		} finally {
+			isParsingMeterOcr = false;
+		}
+	}
+
 	async function handleMeterPhotoChange(e: Event) {
 		if (isUploadingMeterPhoto) return;
 		const input = e.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (!file) return;
 		isUploadingMeterPhoto = true;
+		resetMeterOcrState();
 		try {
 			const label = `Phòng ${fullRoomData?.roomNumber || ''} - Đồng hồ`;
 			const url = await uploadImageToR2(file, 'meter-reading', label, {
 				aspectRatio: METER_PHOTO_ASPECT_RATIO
 			});
-			if (url) meterPhotoUrl = url;
+			if (url) {
+				meterPhotoUrl = url;
+				void parseMeterPhoto(url);
+			}
 		} catch (err: any) {
 			toast.error(err.message);
 		} finally {
@@ -297,7 +338,8 @@
 					serviceId: meterServiceId,
 					month: meterMonth,
 					currValue: Number(meterCurr),
-					photoUrl: meterPhotoUrl
+					photoUrl: meterPhotoUrl,
+					...(meterOcrParsedValue !== null ? { ocrParsedValue: meterOcrParsedValue } : {})
 				})
 			});
 			const data = await res.json();
@@ -307,6 +349,7 @@
 			toast.success('Đã gửi chỉ số, chờ chủ nhà duyệt');
 			meterCurr = '';
 			meterPhotoUrl = '';
+			resetMeterOcrState();
 			fetchTenantData(tenantId);
 		} catch (err: any) {
 			toast.error(err.message);
@@ -683,6 +726,10 @@
 
 	function formatCurrency(amount: number) {
 		return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+	}
+
+	function formatMeterValue(value: number) {
+		return new Intl.NumberFormat('vi-VN').format(value);
 	}
 
 	function getMeteredServiceConfigs() {
@@ -1451,6 +1498,27 @@
 												placeholder="Nhập số đo thực tế..."
 												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-black text-black focus:border-indigo-500 focus:outline-none"
 											/>
+											{#if meterOcrUnavailable && meterPhotoUrl}
+												<p class="text-[11px] font-bold text-zinc-400">OCR chưa bật</p>
+											{:else if meterPhotoUrl && !meterOcrUnavailable}
+												<div
+													class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-[11px] font-bold text-zinc-600"
+												>
+													{#if isParsingMeterOcr}
+														<span class="flex items-center gap-1.5">
+															<Loader2 class="h-3.5 w-3.5 animate-spin" />
+															Đang đọc số từ ảnh...
+														</span>
+													{:else if meterOcrParsedValue !== null}
+														OCR đọc được:
+														<strong class="text-black"
+															>{formatMeterValue(meterOcrParsedValue)}</strong
+														>
+													{:else}
+														<span class="text-zinc-500">OCR không đọc được</span>
+													{/if}
+												</div>
+											{/if}
 										</div>
 									</div>
 

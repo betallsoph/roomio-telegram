@@ -4,10 +4,10 @@
 		CheckCircle2,
 		ChevronRight,
 		House,
+		Loader2,
 		UploadCloud,
 		Zap,
-		Droplet,
-		Image as ImageIcon
+		Droplet
 	} from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { onMount } from 'svelte';
@@ -21,6 +21,54 @@
 	let isUploading = $state(false);
 
 	const activeMeter = $derived(pendingMeters.find((m) => m.id === activeMeterId));
+
+	function formatMeterValue(value: number) {
+		return new Intl.NumberFormat('vi-VN').format(value);
+	}
+
+	function resetMeterOcrState(meterId: string) {
+		const idx = pendingMeters.findIndex((m) => m.id === meterId);
+		if (idx === -1) return;
+		pendingMeters[idx].ocrParsedValue = null;
+		pendingMeters[idx].ocrUnavailable = false;
+		pendingMeters[idx].isParsingOcr = false;
+	}
+
+	async function parseMeterPhoto(meterId: string, photoUrl: string) {
+		resetMeterOcrState(meterId);
+		const idx = pendingMeters.findIndex((m) => m.id === meterId);
+		if (idx === -1) return;
+		pendingMeters[idx].isParsingOcr = true;
+
+		try {
+			const res = await fetch('/api/meter-readings/parse', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				credentials: 'include',
+				body: JSON.stringify({ photoUrl })
+			});
+
+			const meterIdx = pendingMeters.findIndex((m) => m.id === meterId);
+			if (meterIdx === -1) return;
+
+			if (res.status === 503) {
+				pendingMeters[meterIdx].ocrUnavailable = true;
+				return;
+			}
+
+			const data = await res.json();
+			if (!res.ok) return;
+
+			if (typeof data.value === 'number' && Number.isFinite(data.value)) {
+				pendingMeters[meterIdx].ocrParsedValue = data.value;
+			}
+		} catch {
+			// Không chặn luồng gửi chỉ số nếu OCR lỗi
+		} finally {
+			const meterIdx = pendingMeters.findIndex((m) => m.id === meterId);
+			if (meterIdx !== -1) pendingMeters[meterIdx].isParsingOcr = false;
+		}
+	}
 
 	onMount(async () => {
 		if (!authState.isAuthenticated) {
@@ -109,9 +157,6 @@
 					`Phòng ${roomData?.roomNumber || ''} - ${meter?.serviceName || 'Đồng hồ'}`,
 					{ aspectRatio: METER_PHOTO_ASPECT_RATIO }
 				);
-				console.log(
-					`Dung lượng gốc: ${(file.size / 1024).toFixed(1)}KB. Dung lượng nén: ${(compressedBlob.size / 1024).toFixed(1)}KB`
-				);
 
 				const previewUrl = URL.createObjectURL(compressedBlob);
 
@@ -121,10 +166,30 @@
 						URL.revokeObjectURL(pendingMeters[idx].photoUrl);
 					}
 					pendingMeters[idx].photoUrl = previewUrl;
-					(pendingMeters[idx] as any).compressedBlob = compressedBlob;
+					pendingMeters[idx].compressedBlob = compressedBlob;
+					pendingMeters[idx].r2PhotoUrl = null;
+					resetMeterOcrState(meterId);
+					pendingMeters[idx].isUploadingPhoto = true;
 				}
+
+				const finalPhotoUrl = await uploadBlobToR2(compressedBlob, 'meter-reading');
+
+				const uploadIdx = pendingMeters.findIndex((m) => m.id === meterId);
+				if (uploadIdx !== -1) {
+					if (pendingMeters[uploadIdx].photoUrl?.startsWith('blob:')) {
+						URL.revokeObjectURL(pendingMeters[uploadIdx].photoUrl);
+					}
+					pendingMeters[uploadIdx].photoUrl = finalPhotoUrl;
+					pendingMeters[uploadIdx].r2PhotoUrl = finalPhotoUrl;
+					delete pendingMeters[uploadIdx].compressedBlob;
+					pendingMeters[uploadIdx].isUploadingPhoto = false;
+				}
+
+				void parseMeterPhoto(meterId, finalPhotoUrl);
 			} catch (error: any) {
-				toast.error(error.message || 'Lỗi khi nén ảnh');
+				const failIdx = pendingMeters.findIndex((m) => m.id === meterId);
+				if (failIdx !== -1) pendingMeters[failIdx].isUploadingPhoto = false;
+				toast.error(error.message || 'Lỗi khi tải ảnh đồng hồ');
 				console.error(error);
 			} finally {
 				input.value = '';
@@ -142,7 +207,11 @@
 			toast.error('Vui lòng chụp ảnh đồng hồ');
 			return;
 		}
-		if (!activeMeter.compressedBlob) {
+		if (activeMeter.isUploadingPhoto) {
+			toast.error('Ảnh đồng hồ đang tải lên, vui lòng đợi');
+			return;
+		}
+		if (!activeMeter.r2PhotoUrl) {
 			toast.error('Ảnh đồng hồ chưa sẵn sàng, vui lòng chụp lại');
 			return;
 		}
@@ -156,10 +225,8 @@
 		const monthStr = `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
 
 		try {
-			toast.loading('Đang upload ảnh đồng hồ...', { id: 'upload' });
-			const finalPhotoUrl = await uploadBlobToR2(meterToSubmit.compressedBlob, 'meter-reading');
-
 			toast.loading('Đang lưu chỉ số...', { id: 'upload' });
+			const finalPhotoUrl = meterToSubmit.r2PhotoUrl;
 			const meterRes = await fetch('/api/meter-readings', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -169,7 +236,10 @@
 					serviceId: meterToSubmit.id,
 					month: monthStr,
 					currValue: Number(meterToSubmit.currValue),
-					photoUrl: finalPhotoUrl
+					photoUrl: finalPhotoUrl,
+					...(meterToSubmit.ocrParsedValue != null
+						? { ocrParsedValue: meterToSubmit.ocrParsedValue }
+						: {})
 				})
 			});
 
@@ -181,11 +251,8 @@
 			const idx = pendingMeters.findIndex((m) => m.id === meterToSubmit.id);
 			if (idx !== -1) {
 				pendingMeters[idx].status = 'submitted';
-				if (pendingMeters[idx].photoUrl?.startsWith('blob:')) {
-					URL.revokeObjectURL(pendingMeters[idx].photoUrl);
-				}
 				pendingMeters[idx].photoUrl = finalPhotoUrl;
-				delete pendingMeters[idx].compressedBlob;
+				pendingMeters[idx].r2PhotoUrl = finalPhotoUrl;
 			}
 			activeMeterId = null;
 		} catch (error: any) {
@@ -350,6 +417,29 @@
 								placeholder="0"
 							/>
 							<p class="mt-1 text-xs font-medium text-blue-400">{activeMeter.unit}</p>
+							{#if activeMeter.ocrUnavailable && activeMeter.r2PhotoUrl}
+								<p class="mt-2 text-[11px] font-bold text-zinc-400">OCR chưa bật</p>
+							{:else if activeMeter.r2PhotoUrl && !activeMeter.ocrUnavailable}
+								<div
+									class="mt-2 rounded-lg border border-blue-100 bg-white/80 px-2.5 py-2 text-[11px] font-bold text-zinc-600"
+								>
+									{#if activeMeter.isParsingOcr || activeMeter.isUploadingPhoto}
+										<span class="flex items-center gap-1.5">
+											<Loader2 class="h-3.5 w-3.5 animate-spin" />
+											{activeMeter.isUploadingPhoto
+												? 'Đang tải ảnh...'
+												: 'Đang đọc số từ ảnh...'}
+										</span>
+									{:else if activeMeter.ocrParsedValue != null}
+										OCR đọc được:
+										<strong class="text-black"
+											>{formatMeterValue(activeMeter.ocrParsedValue)}</strong
+										>
+									{:else}
+										<span class="text-zinc-500">OCR không đọc được</span>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					</div>
 

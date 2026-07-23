@@ -10,6 +10,7 @@
 		month: string;
 		prevValue: number;
 		currValue: number;
+		ocrParsedValue: number | null;
 		recordedAt: string;
 		photoUrl: string | null;
 		status: string;
@@ -89,6 +90,18 @@
 		if (status === 'approved') return { text: 'Đã chốt', cls: 'bg-green-200' };
 		return { text: 'Từ chối', cls: 'bg-red-200' };
 	}
+
+	function formatMeterValue(value: number) {
+		return new Intl.NumberFormat('vi-VN').format(value);
+	}
+
+	function ocrMismatch(reading: ReadingRow) {
+		return (
+			reading.ocrParsedValue != null &&
+			Number.isFinite(reading.ocrParsedValue) &&
+			reading.ocrParsedValue !== reading.currValue
+		);
+	}
 </script>
 
 <div class="space-y-5">
@@ -166,6 +179,34 @@
 							Tháng {reading.month} | Gửi ngày {reading.recordedAt} |
 							{reading.submittedBy === 'TENANT' ? 'Khách tự báo số' : 'Chủ nhà ghi'}
 						</p>
+						<div class="mt-2 grid grid-cols-3 gap-2">
+							<div class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2">
+								<p class="text-[10px] font-black text-zinc-400 uppercase">Khách nhập</p>
+								<p class="text-base font-black text-blue-600">
+									{formatMeterValue(reading.currValue)}
+								</p>
+							</div>
+							<div class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2">
+								<p class="text-[10px] font-black text-zinc-400 uppercase">OCR</p>
+								<p class="text-base font-black text-black">
+									{reading.ocrParsedValue != null
+										? formatMeterValue(reading.ocrParsedValue)
+										: '—'}
+								</p>
+							</div>
+							<div class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2">
+								<p class="text-[10px] font-black text-zinc-400 uppercase">Tiêu thụ</p>
+								<p class="text-base font-black {usage < 0 ? 'text-red-600' : 'text-black'}">
+									{usage}
+								</p>
+							</div>
+						</div>
+						{#if ocrMismatch(reading)}
+							<p class="mt-2 flex items-center gap-1 text-xs font-bold text-amber-700">
+								<TriangleAlert class="h-3.5 w-3.5" />
+								Khách nhập khác OCR — hãy đối chiếu ảnh trước khi chốt
+							</p>
+						{/if}
 						<div class="mt-2 flex flex-wrap items-center gap-2">
 							<label class="text-xs font-black text-zinc-500">
 								Đầu kỳ
