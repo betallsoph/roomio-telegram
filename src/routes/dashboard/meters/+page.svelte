@@ -191,9 +191,7 @@
 							<div class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2">
 								<p class="text-[10px] font-black text-zinc-400 uppercase">OCR</p>
 								<p class="text-base font-black text-black">
-									{reading.ocrParsedValue != null
-										? formatMeterValue(reading.ocrParsedValue)
-										: '—'}
+									{reading.ocrParsedValue != null ? formatMeterValue(reading.ocrParsedValue) : '—'}
 								</p>
 							</div>
 							<div class="rounded-lg border border-zinc-200 bg-zinc-50 px-2.5 py-2">
@@ -276,8 +274,4 @@
 	{/if}
 </div>
 
-<ImageLightbox
-	src={previewPhotoUrl}
-	alt="Ảnh đồng hồ"
-	onClose={() => (previewPhotoUrl = null)}
-/>
+<ImageLightbox src={previewPhotoUrl} alt="Ảnh đồng hồ" onClose={() => (previewPhotoUrl = null)} />

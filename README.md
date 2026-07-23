@@ -14,23 +14,23 @@ TMA dùng cùng quy ước domain với `roomio-web`; label và option đọc t�
 
 ### Trục A — `rentalType` (ảnh hưởng giá và hạn mức)
 
-| Mã DB | Nhãn tiếng Việt | Nhóm giá |
-| ----- | ---------------- | -------- |
-| `APARTMENT` | Share phòng chung cư / Co-living | Co-living |
-| `MOTEL` | Phòng trọ truyền thống / Căn hộ dịch vụ | Tiêu chuẩn |
-| `DORM` | KTX / Sleepbox | Tiêu chuẩn |
+| Mã DB        | Nhãn tiếng Việt                             | Nhóm giá   |
+| ------------ | ------------------------------------------- | ---------- |
+| `APARTMENT`  | Share phòng chung cư / Co-living            | Co-living  |
+| `MOTEL`      | Phòng trọ truyền thống / Căn hộ dịch vụ     | Tiêu chuẩn |
+| `DORM`       | KTX / Sleepbox                              | Tiêu chuẩn |
 | `WHOLE_UNIT` | Căn hộ chung cư nguyên căn / Nhà nguyên căn | Tiêu chuẩn |
 
 Allowlist loại hình: `LandlordProfile.enabledRentalTypes`. Hạn mức thương lượng: `subscribedStandardRoomLimit` / `subscribedColivingRoomLimit`.
 
 ### Trục B — `operatingModel` (metadata, không ảnh hưởng giá)
 
-| Mã DB | Nhãn tiếng Việt |
-| ----- | ---------------- |
-| `UNSPECIFIED` | Chưa phân loại (mặc định) |
-| `OWNED` | Tự sở hữu |
-| `RENT_TO_RENT` | Thuê lại để cho thuê |
-| `MANAGED` | Quản lý hộ chủ nhà |
+| Mã DB          | Nhãn tiếng Việt           |
+| -------------- | ------------------------- |
+| `UNSPECIFIED`  | Chưa phân loại (mặc định) |
+| `OWNED`        | Tự sở hữu                 |
+| `RENT_TO_RENT` | Thuê lại để cho thuê      |
+| `MANAGED`      | Quản lý hộ chủ nhà        |
 
 TMA hiện đồng bộ option loại hình với web; trục B chưa có UI riêng trên TMA — API vẫn nhận/lưu field khi client gửi.
 

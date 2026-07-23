@@ -589,8 +589,4 @@
 	</div>
 {/if}
 
-<ImageLightbox
-	src={previewPhotoUrl}
-	alt="Ảnh đồng hồ"
-	onClose={() => (previewPhotoUrl = null)}
-/>
+<ImageLightbox src={previewPhotoUrl} alt="Ảnh đồng hồ" onClose={() => (previewPhotoUrl = null)} />

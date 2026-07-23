@@ -466,7 +466,9 @@
 
 					<div class="space-y-1">
 						<label for="p-blocks" class="block text-xs font-bold text-zinc-600"
-							>{blockLabel(rentalType)}{isApartmentRentalType(rentalType) ? '' : ' (tùy chọn)'}</label
+							>{blockLabel(rentalType)}{isApartmentRentalType(rentalType)
+								? ''
+								: ' (tùy chọn)'}</label
 						>
 						<input
 							id="p-blocks"

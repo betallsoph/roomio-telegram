@@ -3,11 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
-	import {
-		RENTAL_TYPE_OPTIONS,
-		parseRentalTypes,
-		rentalTypeLabel
-	} from '$lib/rental-types';
+	import { RENTAL_TYPE_OPTIONS, parseRentalTypes, rentalTypeLabel } from '$lib/rental-types';
 	import {
 		Check,
 		Eye,

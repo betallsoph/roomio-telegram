@@ -31,7 +31,9 @@ export function getUtilityServiceConfig(
 	if (!services) return null;
 	return (
 		services.find((s) =>
-			utility === 'water' ? isWaterServiceName(s.service.name) : isElectricServiceName(s.service.name)
+			utility === 'water'
+				? isWaterServiceName(s.service.name)
+				: isElectricServiceName(s.service.name)
 		) ?? null
 	);
 }

@@ -746,11 +746,7 @@
 	}
 
 	function getHistoryReadings(utility: MeterUtility) {
-		return getUtilityMeterReadings(
-			fullRoomData?.services,
-			fullRoomData?.meterReadings,
-			utility
-		);
+		return getUtilityMeterReadings(fullRoomData?.services, fullRoomData?.meterReadings, utility);
 	}
 
 	function isHistoryUtilityKhoan(utility: MeterUtility) {
@@ -1599,9 +1595,7 @@
 								<h3 class="text-lg font-black text-black">Lịch sử tự báo số điện nước</h3>
 							</div>
 
-							<div
-								class="flex gap-1 rounded-xl border border-zinc-200 bg-zinc-100 p-1"
-							>
+							<div class="flex gap-1 rounded-xl border border-zinc-200 bg-zinc-100 p-1">
 								<button
 									type="button"
 									onclick={() => (historyMeterTab = 'electric')}
@@ -1634,9 +1628,7 @@
 											: 'text-blue-500'}"
 									/>
 									<h4 class="mt-3 text-base font-black text-black">
-										{historyMeterTab === 'electric'
-											? 'Điện khoán cố định'
-											: 'Nước khoán cố định'}
+										{historyMeterTab === 'electric' ? 'Điện khoán cố định' : 'Nước khoán cố định'}
 									</h4>
 									<p
 										class="mx-auto mt-2 max-w-sm text-xs leading-relaxed font-semibold text-zinc-500"
@@ -1652,9 +1644,7 @@
 								<div class="space-y-2">
 									{#each getHistoryReadings(historyMeterTab) as read}
 										{@const badge = getMeterStatusBadge(read.status)}
-										<div
-											class="rounded-xl border border-zinc-200 bg-white p-4 text-sm"
-										>
+										<div class="rounded-xl border border-zinc-200 bg-white p-4 text-sm">
 											<div class="flex items-start justify-between gap-3">
 												<div class="min-w-0">
 													<p class="font-black text-black">Tháng {read.month}</p>
@@ -2193,11 +2183,7 @@
 		</main>
 	{/if}
 
-	<ImageLightbox
-		src={previewPhotoUrl}
-		alt="Ảnh đồng hồ"
-		onClose={() => (previewPhotoUrl = null)}
-	/>
+	<ImageLightbox src={previewPhotoUrl} alt="Ảnh đồng hồ" onClose={() => (previewPhotoUrl = null)} />
 </div>
 
 <style>

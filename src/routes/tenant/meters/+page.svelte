@@ -426,9 +426,7 @@
 									{#if activeMeter.isParsingOcr || activeMeter.isUploadingPhoto}
 										<span class="flex items-center gap-1.5">
 											<Loader2 class="h-3.5 w-3.5 animate-spin" />
-											{activeMeter.isUploadingPhoto
-												? 'Đang tải ảnh...'
-												: 'Đang đọc số từ ảnh...'}
+											{activeMeter.isUploadingPhoto ? 'Đang tải ảnh...' : 'Đang đọc số từ ảnh...'}
 										</span>
 									{:else if activeMeter.ocrParsedValue != null}
 										OCR đọc được:
