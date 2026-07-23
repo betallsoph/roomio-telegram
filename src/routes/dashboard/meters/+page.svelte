@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { Gauge, Check, X, TriangleAlert, Camera, Loader2 } from '@lucide/svelte';
+	import ImageLightbox from '$lib/ImageLightbox.svelte';
 
 	interface ReadingRow {
 		id: string;
@@ -26,6 +27,7 @@
 	let isLoading = $state(true);
 	let filter = $state<'pending' | 'all'>('pending');
 	let processingId = $state('');
+	let previewPhotoUrl = $state<string | null>(null);
 
 	// Cho phép chủ nhà sửa lại số trước khi duyệt
 	let edits = $state<Record<string, { prevValue: number; currValue: number }>>({});
@@ -235,15 +237,14 @@
 
 					<div class="flex shrink-0 items-center gap-2">
 						{#if reading.photoUrl}
-							<a
-								href={reading.photoUrl}
-								target="_blank"
-								rel="noreferrer"
+							<button
+								type="button"
+								onclick={() => (previewPhotoUrl = reading.photoUrl)}
 								class="block overflow-hidden rounded-lg border-2 border-black"
 								title="Xem ảnh đồng hồ"
 							>
 								<img src={reading.photoUrl} alt="Ảnh đồng hồ" class="h-16 w-16 object-cover" />
-							</a>
+							</button>
 						{:else}
 							<div
 								class="flex h-16 w-16 items-center justify-center rounded-lg border-2 border-dashed border-zinc-300 text-zinc-300"
@@ -274,3 +275,9 @@
 		</div>
 	{/if}
 </div>
+
+<ImageLightbox
+	src={previewPhotoUrl}
+	alt="Ảnh đồng hồ"
+	onClose={() => (previewPhotoUrl = null)}
+/>

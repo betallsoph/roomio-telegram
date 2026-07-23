@@ -4,6 +4,13 @@
 	import { toast } from 'svelte-sonner';
 	import { METER_PHOTO_ASPECT_RATIO, uploadImage, uploadImageToR2 } from '$lib/upload';
 	import { authState, clearAuth, setAuthError } from '$lib/auth.svelte';
+	import ImageLightbox from '$lib/ImageLightbox.svelte';
+	import {
+		getMeteredServiceConfigs as getMeteredConfigs,
+		getUtilityMeterReadings,
+		isUtilityKhoan,
+		type MeterUtility
+	} from '$lib/meter-utils';
 	import {
 		Home,
 		Receipt,
@@ -159,6 +166,8 @@
 	let meterOcrUnavailable = $state(false);
 	let isSubmittingMeter = $state(false);
 	let isUploadingMeterPhoto = $state(false);
+	let historyMeterTab = $state<MeterUtility>('electric');
+	let previewPhotoUrl = $state<string | null>(null);
 
 	// Lists
 	let invoices = $state<Invoice[]>([]);
@@ -733,7 +742,19 @@
 	}
 
 	function getMeteredServiceConfigs() {
-		return fullRoomData?.services?.filter((s: any) => s.service.type === 'METERED') ?? [];
+		return getMeteredConfigs(fullRoomData?.services);
+	}
+
+	function getHistoryReadings(utility: MeterUtility) {
+		return getUtilityMeterReadings(
+			fullRoomData?.services,
+			fullRoomData?.meterReadings,
+			utility
+		);
+	}
+
+	function isHistoryUtilityKhoan(utility: MeterUtility) {
+		return isUtilityKhoan(fullRoomData?.services, utility);
 	}
 
 	function getRecentInvoices(limit = 3) {
@@ -1578,69 +1599,106 @@
 								<h3 class="text-lg font-black text-black">Lịch sử tự báo số điện nước</h3>
 							</div>
 
-							{#if !fullRoomData || fullRoomData.meterReadings.length === 0}
+							<div
+								class="flex gap-1 rounded-xl border border-zinc-200 bg-zinc-100 p-1"
+							>
+								<button
+									type="button"
+									onclick={() => (historyMeterTab = 'electric')}
+									class="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[6px] py-2 text-xs font-black transition-all {historyMeterTab ===
+									'electric'
+										? 'bg-white text-black shadow-sm'
+										: 'text-zinc-500 hover:bg-white/60'}"
+								>
+									<Zap class="h-3.5 w-3.5 shrink-0" />
+									Điện
+								</button>
+								<button
+									type="button"
+									onclick={() => (historyMeterTab = 'water')}
+									class="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-[6px] py-2 text-xs font-black transition-all {historyMeterTab ===
+									'water'
+										? 'bg-white text-black shadow-sm'
+										: 'text-zinc-500 hover:bg-white/60'}"
+								>
+									<Droplet class="h-3.5 w-3.5 shrink-0" />
+									Nước
+								</button>
+							</div>
+
+							{#if isHistoryUtilityKhoan(historyMeterTab)}
+								<div class="rounded-xl border border-zinc-200 bg-white py-10 text-center">
+									<CheckCircle2
+										class="mx-auto h-10 w-10 {historyMeterTab === 'electric'
+											? 'text-amber-500'
+											: 'text-blue-500'}"
+									/>
+									<h4 class="mt-3 text-base font-black text-black">
+										{historyMeterTab === 'electric'
+											? 'Điện khoán cố định'
+											: 'Nước khoán cố định'}
+									</h4>
+									<p
+										class="mx-auto mt-2 max-w-sm text-xs leading-relaxed font-semibold text-zinc-500"
+									>
+										Chủ trọ thu khoản này theo gói hàng tháng, không cần gửi chỉ số đồng hồ.
+									</p>
+								</div>
+							{:else if getHistoryReadings(historyMeterTab).length === 0}
 								<p class="py-8 text-center text-sm font-bold text-zinc-400">
-									Chưa có lịch sử báo số nào.
+									Chưa có lịch sử báo số {historyMeterTab === 'electric' ? 'điện' : 'nước'} nào.
 								</p>
 							{:else}
-								<div class="overflow-x-auto">
-									<table class="w-full border-collapse text-left text-xs">
-										<thead>
-											<tr class="border-b border-zinc-100 bg-zinc-50 font-black text-zinc-600">
-												<th class="px-4 py-3">Tháng</th>
-												<th class="px-4 py-3">Dịch vụ</th>
-												<th class="px-4 py-3">Chỉ số Cũ → Mới</th>
-												<th class="px-4 py-3">Tiêu thụ</th>
-												<th class="px-4 py-3">Trạng thái</th>
-												<th class="px-4 py-3">Ảnh đồng hồ</th>
-												<th class="px-4 py-3 text-right">Ngày gửi</th>
-											</tr>
-										</thead>
-										<tbody class="divide-y divide-zinc-200">
-											{#each fullRoomData.meterReadings as read}
-												{@const serviceName =
-													fullRoomData.services.find((s: any) => s.serviceId === read.serviceId)
-														?.service.name || 'Điện/Nước'}
-												{@const badge = getMeterStatusBadge(read.status)}
-												<tr class="font-semibold text-zinc-600">
-													<td class="px-4 py-3 font-black text-black">{read.month}</td>
-													<td class="px-4 py-3 text-zinc-800">{serviceName}</td>
-													<td class="px-4 py-3">
+								<div class="space-y-2">
+									{#each getHistoryReadings(historyMeterTab) as read}
+										{@const badge = getMeterStatusBadge(read.status)}
+										<div
+											class="rounded-xl border border-zinc-200 bg-white p-4 text-sm"
+										>
+											<div class="flex items-start justify-between gap-3">
+												<div class="min-w-0">
+													<p class="font-black text-black">Tháng {read.month}</p>
+													<p class="mt-0.5 text-[10px] font-bold text-zinc-400">
+														Gửi {new Date(read.recordedAt).toLocaleDateString('vi-VN')}
+													</p>
+												</div>
+												<span
+													class="shrink-0 rounded border border-zinc-300 px-1.5 text-[10px] font-black {badge.cls}"
+													>{badge.label}</span
+												>
+											</div>
+											<div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+												<div class="rounded-lg border border-zinc-100 bg-zinc-50 px-2.5 py-2">
+													<p class="font-bold text-zinc-400">Chỉ số</p>
+													<p class="mt-0.5 font-black text-black">
 														{read.prevValue} → {read.currValue}
-														{#if read.submittedValue != null && read.submittedValue !== read.currValue}
-															<span class="block text-[10px] font-bold text-blue-500">
-																Bạn đã gửi {read.submittedValue}
-															</span>
-														{/if}
-													</td>
-													<td class="px-4 py-3 font-black text-black"
-														>{read.currValue - read.prevValue}</td
-													>
-													<td class="px-4 py-3">
-														<span
-															class="rounded border border-zinc-300 px-1.5 text-xs font-black {badge.cls}"
-															>{badge.label}</span
-														>
-													</td>
-													<td class="px-4 py-3 font-bold text-blue-500">
-														{#if read.photoUrl}
-															<a
-																href={read.photoUrl}
-																target="_blank"
-																rel="noreferrer"
-																class="hover:underline">Xem ảnh</a
-															>
-														{:else}
-															<span class="font-medium text-zinc-300">Không có</span>
-														{/if}
-													</td>
-													<td class="px-4 py-3 text-right text-zinc-400"
-														>{new Date(read.recordedAt).toLocaleDateString('vi-VN')}</td
-													>
-												</tr>
-											{/each}
-										</tbody>
-									</table>
+													</p>
+													{#if read.submittedValue != null && read.submittedValue !== read.currValue}
+														<p class="mt-0.5 text-[10px] font-bold text-blue-500">
+															Bạn đã gửi {read.submittedValue}
+														</p>
+													{/if}
+												</div>
+												<div class="rounded-lg border border-zinc-100 bg-zinc-50 px-2.5 py-2">
+													<p class="font-bold text-zinc-400">Tiêu thụ</p>
+													<p class="mt-0.5 font-black text-black">
+														{read.currValue - read.prevValue}
+														{historyMeterTab === 'electric' ? 'kWh' : 'm³'}
+													</p>
+												</div>
+											</div>
+											{#if read.photoUrl}
+												<button
+													type="button"
+													onclick={() => (previewPhotoUrl = read.photoUrl)}
+													class="mt-3 inline-flex items-center gap-1.5 rounded-[6px] border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-black text-blue-600 shadow-sm"
+												>
+													<Camera class="h-3.5 w-3.5" />
+													Xem ảnh đồng hồ
+												</button>
+											{/if}
+										</div>
+									{/each}
 								</div>
 							{/if}
 						</section>
@@ -2134,6 +2192,12 @@
 			</div>
 		</main>
 	{/if}
+
+	<ImageLightbox
+		src={previewPhotoUrl}
+		alt="Ảnh đồng hồ"
+		onClose={() => (previewPhotoUrl = null)}
+	/>
 </div>
 
 <style>

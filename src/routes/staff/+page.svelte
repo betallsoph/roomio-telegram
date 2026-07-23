@@ -14,6 +14,7 @@
 		AlertTriangle,
 		Image as ImageIcon
 	} from '@lucide/svelte';
+	import ImageLightbox from '$lib/ImageLightbox.svelte';
 
 	interface Request {
 		id: string;
@@ -68,6 +69,7 @@
 	let selectedRequest = $state<Request | null>(null);
 	let replyText = $state('');
 	let isSubmitting = $state(false);
+	let previewPhotoUrl = $state<string | null>(null);
 
 	onMount(() => {
 		const sessionStr = localStorage.getItem('roomio_user');
@@ -410,14 +412,13 @@
 									<p class="py-1.5 text-sm font-black text-blue-600">{m.currValue - m.prevValue}</p>
 								</div>
 								{#if m.photoUrl}
-									<a
-										href={m.photoUrl}
-										target="_blank"
-										rel="noreferrer"
+									<button
+										type="button"
+										onclick={() => (previewPhotoUrl = m.photoUrl)}
 										class="flex items-center gap-1 rounded-[6px] border-2 border-black bg-white px-2.5 py-1.5 text-xs font-bold text-black shadow-secondary transition-all active:translate-x-[1px] active:translate-y-[1px]"
 									>
 										<ImageIcon class="h-3.5 w-3.5" /> Ảnh
-									</a>
+									</button>
 								{/if}
 								<div class="ml-auto flex gap-2">
 									<button
@@ -587,3 +588,9 @@
 		</div>
 	</div>
 {/if}
+
+<ImageLightbox
+	src={previewPhotoUrl}
+	alt="Ảnh đồng hồ"
+	onClose={() => (previewPhotoUrl = null)}
+/>
