@@ -9,7 +9,7 @@
 		"skipLibCheck": true,
 		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler"
-	},
-	"exclude": ["**/*.test.ts"]
+		"moduleResolution": "bundler",
+		"allowImportingTsExtensions": true
+	}
 }
