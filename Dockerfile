@@ -1,5 +1,5 @@
 # --- BƯỚC 1: XÂY DỰNG (BUILD) ---
-    FROM node:20-alpine AS builder
+    FROM node:24-alpine AS builder
     WORKDIR /app
     
     # Copy file cấu hình gói và cài đặt dependencies
