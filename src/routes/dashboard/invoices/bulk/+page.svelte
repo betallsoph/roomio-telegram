@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
+	import { SvelteDate } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -17,6 +19,7 @@
 		name: string;
 		type: string;
 		defaultRate: number;
+		isActive?: boolean;
 	}
 
 	interface ServiceConfig {
@@ -30,6 +33,7 @@
 		id: string;
 		roomNumber: string;
 		monthlyRent: number;
+		tenantId: string | null;
 		tenant: {
 			id: string;
 			user: {
@@ -75,7 +79,7 @@
 		landlordId = session.landlordProfileId;
 
 		// Default due date: 5th of next month
-		const nextMonth = new Date();
+		const nextMonth = new SvelteDate();
 		nextMonth.setMonth(nextMonth.getMonth() + 1);
 		nextMonth.setDate(5);
 		dueDate = nextMonth.toISOString().split('T')[0];
@@ -94,8 +98,8 @@
 					selectedPropertyId = properties[0].id;
 				}
 			}
-		} catch (e: any) {
-			toast.error('Lỗi tải danh sách tòa nhà: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi tải danh sách tòa nhà: ' + getErrorMessage(e));
 		} finally {
 			isLoadingProperties = false;
 		}
@@ -110,13 +114,13 @@
 			const roomsData = await res.json();
 
 			// Filter only occupied rooms (rooms with tenant)
-			const occupiedRooms = roomsData.filter((r: any) => r.tenantId !== null);
+			const occupiedRooms = (roomsData as Room[]).filter((r) => r.tenantId !== null);
 			rooms = occupiedRooms;
 
 			// 2. Extract metered services active in these rooms
 			const mServices: Record<string, Service> = {};
-			occupiedRooms.forEach((r: any) => {
-				r.services.forEach((c: any) => {
+			occupiedRooms.forEach((r) => {
+				r.services.forEach((c) => {
 					if (c.service.type === 'METERED' && c.service.isActive) {
 						mServices[c.serviceId] = c.service;
 					}
@@ -127,12 +131,12 @@
 			// 3. Initialize readingsMap with previous values
 			const newReadings: typeof readingsMap = {};
 
-			occupiedRooms.forEach((r: any) => {
+			occupiedRooms.forEach((r) => {
 				newReadings[r.id] = {};
 
 				meteredServices.forEach((s) => {
 					// Find the last recorded reading for this service in this room
-					const lastReading = r.meterReadings.find((mr: any) => mr.serviceId === s.id);
+					const lastReading = r.meterReadings.find((mr) => mr.serviceId === s.id);
 
 					newReadings[r.id][s.id] = {
 						prevValue: lastReading ? lastReading.currValue.toString() : '0',
@@ -149,7 +153,9 @@
 				const prefill = await prefillRes.json();
 				if (prefillRes.ok) {
 					for (const [roomId, services] of Object.entries(prefill.readings || {})) {
-						for (const [serviceId, reading] of Object.entries(services as Record<string, any>)) {
+						for (const [serviceId, reading] of Object.entries(
+							services as Record<string, { status: string; prevValue: number; currValue: number }>
+						)) {
 							if (reading.status === 'approved' && newReadings[roomId]?.[serviceId]) {
 								newReadings[roomId][serviceId] = {
 									prevValue: reading.prevValue.toString(),
@@ -164,8 +170,8 @@
 			}
 
 			readingsMap = newReadings;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải dữ liệu phòng: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải dữ liệu phòng: ' + getErrorMessage(e));
 		} finally {
 			isLoadingRooms = false;
 		}
@@ -245,8 +251,8 @@
 
 			toast.success(`Đã tạo thành công ${data.count} hóa đơn tháng ${month}!`);
 			goto('/dashboard/invoices');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -300,7 +306,7 @@
 						required
 						class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-semibold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 					>
-						{#each properties as prop}
+						{#each properties as prop (prop.id)}
 							<option value={prop.id}>{prop.name}</option>
 						{/each}
 					</select>
@@ -362,7 +368,7 @@
 									<th class="px-4 py-3">Khách thuê</th>
 									<th class="px-4 py-3">Giá phòng</th>
 
-									{#each meteredServices as service}
+									{#each meteredServices as service (service.id)}
 										<th class="bg-blue-150/40 border-l-2 border-black px-4 py-3 text-center">
 											<div class="flex items-center justify-center gap-1">
 												{#if service.name.includes('Điện')}
@@ -377,7 +383,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each rooms as room}
+								{#each rooms as room (room.id)}
 									<tr
 										class="border-b border-black/15 font-semibold text-black transition-all hover:bg-slate-50"
 									>
@@ -385,7 +391,7 @@
 										<td class="px-4 py-4">{room.tenant?.user.name || '--'}</td>
 										<td class="px-4 py-4 font-black">{formatCurrency(room.monthlyRent)}</td>
 
-										{#each meteredServices as service}
+										{#each meteredServices as service (service.id)}
 											{@const readings = readingsMap[room.id]?.[service.id] || {
 												prevValue: '0',
 												currValue: ''

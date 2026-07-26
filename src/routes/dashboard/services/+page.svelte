@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { Plug, Plus, X, Loader2, Pencil, Trash2, Power, PowerOff } from '@lucide/svelte';
@@ -50,8 +51,8 @@
 			const data = await res.json();
 			if (res.ok) services = data;
 			else toast.error(data.error || 'Lỗi khi tải danh sách dịch vụ');
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách dịch vụ: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách dịch vụ: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -100,8 +101,8 @@
 			toast.success(isEdit ? 'Đã cập nhật dịch vụ' : `Đã thêm dịch vụ "${name}" cho mọi phòng`);
 			isDialogOpen = false;
 			if (landlordId) fetchServices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -118,8 +119,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi cập nhật trạng thái');
 			toast.success(svc.isActive ? 'Đã tạm ngưng dịch vụ' : 'Đã bật lại dịch vụ');
 			if (landlordId) fetchServices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -139,8 +140,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa dịch vụ');
 			toast.success('Đã xóa dịch vụ');
 			if (landlordId) fetchServices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -199,7 +200,7 @@
 		<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
 			<!-- Mobile card list -->
 			<div class="divide-y-2 divide-black bg-white sm:hidden">
-				{#each services as svc}
+				{#each services as svc (svc.id)}
 					<div class="space-y-2 p-4">
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">
@@ -258,7 +259,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each services as svc}
+						{#each services as svc (svc.id)}
 							<tr
 								class="border-b border-black/15 font-semibold text-black transition-all hover:bg-slate-50"
 							>
@@ -330,6 +331,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<div
 					class="flex shrink-0 items-center gap-2 border-b-2 border-black bg-zinc-50 px-4 py-3 select-none"
@@ -384,7 +386,7 @@
 								bind:value={type}
 								class="w-full rounded-lg border-2 border-black bg-white px-2.5 py-1.5 text-xs font-semibold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 							>
-								{#each TYPE_OPTIONS as opt}
+								{#each TYPE_OPTIONS as opt (opt)}
 									<option value={opt}>{TYPE_LABELS[opt]}</option>
 								{/each}
 							</select>

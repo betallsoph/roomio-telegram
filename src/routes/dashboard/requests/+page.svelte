@@ -1,17 +1,8 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
-	import {
-		Wrench,
-		X,
-		Check,
-		AlertTriangle,
-		Clock,
-		User,
-		Calendar,
-		MessageSquare,
-		Loader2
-	} from '@lucide/svelte';
+	import { Wrench, X, Check, User, Calendar, Loader2 } from '@lucide/svelte';
 
 	interface Request {
 		id: string;
@@ -75,8 +66,8 @@
 			const res = await fetch(`/api/requests?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) requests = data;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách sự cố: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách sự cố: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -87,7 +78,7 @@
 			const res = await fetch(`/api/staff?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) staffList = data;
-		} catch (e) {
+		} catch {
 			// Bỏ qua lỗi tải nhân viên — vẫn xem được sự cố
 		}
 	}
@@ -106,8 +97,8 @@
 
 			toast.success(assignSelection ? 'Đã giao việc cho nhân viên' : 'Đã bỏ phân công');
 			if (landlordId) fetchRequests(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isAssigning = false;
 		}
@@ -136,8 +127,8 @@
 			selectedRequest = null;
 			replyText = '';
 			if (landlordId) fetchRequests(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -231,7 +222,7 @@
 	{:else}
 		<!-- Grid of incident cards -->
 		<div class="grid gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-			{#each filteredRequests() as req}
+			{#each filteredRequests() as req (req.id)}
 				{@const statusBadge =
 					req.status === 'completed'
 						? 'bg-green-200 text-green-800'
@@ -326,6 +317,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Windows Header style -->
 				<div
@@ -441,7 +433,7 @@
 								class="flex-1 rounded-lg border-2 border-black bg-white px-3 py-2 text-xs font-semibold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 							>
 								<option value="">— Chưa giao —</option>
-								{#each staffList as s}
+								{#each staffList as s (s.id)}
 									<option value={s.id}>{s.user.name}</option>
 								{/each}
 							</select>

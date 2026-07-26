@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { toast } from 'svelte-sonner';
@@ -11,21 +12,11 @@
 	} from '$lib/rental-types';
 	import {
 		Home,
-		Building2,
 		Plus,
 		X,
-		User,
-		Receipt,
-		Zap,
-		Droplet,
-		Wifi,
 		Trash2,
-		Wrench,
-		FileText,
-		Check,
 		Loader2,
 		LogOut,
-		CheckCircle2,
 		ArrowRight,
 		LayoutGrid,
 		List
@@ -102,7 +93,6 @@
 		blocks: { id: string; name: string }[];
 	}
 
-	let landlordId = $state<string | null>(null);
 	let isLoading = $state(true);
 	let properties = $state<Property[]>([]);
 	let rooms = $state<Room[]>([]);
@@ -148,7 +138,6 @@
 		const sessionStr = localStorage.getItem('roomio_user');
 		if (!sessionStr) return;
 		const session = JSON.parse(sessionStr);
-		landlordId = session.landlordProfileId;
 
 		// Parse query params (e.g. from building details click)
 		const propertyParam = page.url.searchParams.get('propertyId');
@@ -196,8 +185,8 @@
 			if (selectedPropertyId) {
 				await fetchRooms(selectedPropertyId);
 			}
-		} catch (e: any) {
-			toast.error('Lỗi khi tải dữ liệu: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải dữ liệu: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -210,8 +199,8 @@
 			const res = await fetch(`/api/rooms?propertyId=${propertyId}${blockFilter}`);
 			const data = await res.json();
 			if (res.ok) rooms = data;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách phòng: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách phòng: ' + getErrorMessage(e));
 		}
 	}
 
@@ -270,8 +259,8 @@
 
 			// Refresh
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isCreatingRoom = false;
 		}
@@ -302,8 +291,8 @@
 			isDetailOpen = false;
 			selectedRoom = null;
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -324,8 +313,8 @@
 			toast.success('Đã cập nhật biểu phí riêng của phòng');
 			selectedRoom = data;
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -361,8 +350,8 @@
 			meterCurr = '';
 			meterPrev = '';
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isLoggingMeter = false;
 		}
@@ -402,8 +391,8 @@
 			selectedRoom = data;
 			resetAssetForm();
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isAddingAsset = false;
 		}
@@ -454,8 +443,8 @@
 			toast.success('Đã xóa thiết bị');
 			selectedRoom = data;
 			fetchRooms(selectedPropertyId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -520,7 +509,7 @@
 					bind:value={selectedPropertyId}
 					class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-bold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 				>
-					{#each properties as prop}
+					{#each properties as prop (prop.id)}
 						<option value={prop.id}>{prop.name}</option>
 					{/each}
 				</select>
@@ -534,7 +523,7 @@
 						class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-bold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 					>
 						<option value="all">Tất cả {blockLabel().toLowerCase()}</option>
-						{#each getActiveProperty()!.blocks as block}
+						{#each getActiveProperty()!.blocks as block (block.id)}
 							<option value={block.id}>{block.name}</option>
 						{/each}
 					</select>
@@ -608,7 +597,7 @@
 		<div
 			class="grid grid-cols-1 gap-4 min-[430px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
 		>
-			{#each rooms as room}
+			{#each rooms as room (room.id)}
 				{@const statusColor =
 					room.status === 'empty'
 						? 'border-black bg-white'
@@ -659,7 +648,7 @@
 			</div>
 
 			<div class="divide-y-2 divide-black">
-				{#each rooms as room}
+				{#each rooms as room (room.id)}
 					{@const statusBg =
 						room.status === 'empty'
 							? 'bg-white'
@@ -736,6 +725,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- macOS Style Header -->
 				<div
@@ -844,7 +834,7 @@
 								class="w-full rounded-lg border-2 border-black bg-white px-3 py-2 text-sm font-bold text-black focus:outline-none"
 							>
 								<option value="">Không có {blockLabel().toLowerCase()}</option>
-								{#each getActiveProperty()!.blocks as block}
+								{#each getActiveProperty()!.blocks as block (block.id)}
 									<option value={block.id}>{block.name}</option>
 								{/each}
 							</select>
@@ -891,6 +881,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- macOS Style Header -->
 				<div
@@ -1068,7 +1059,7 @@
 										</div>
 
 										<div class="divide-y divide-zinc-200">
-											{#each selectedRoom.services as config}
+											{#each selectedRoom.services as config (config.serviceId)}
 												<div
 													class="flex flex-col items-start justify-between gap-3 py-3 sm:flex-row sm:items-center"
 												>
@@ -1158,7 +1149,7 @@
 														class="w-full rounded-lg border-2 border-black bg-white px-2.5 py-1.5 text-xs font-semibold text-black focus:outline-none"
 													>
 														<option value="">-- Chọn dịch vụ --</option>
-														{#each selectedRoom.services.filter((s) => s.service.type === 'METERED') as c}
+														{#each selectedRoom.services.filter((s) => s.service.type === 'METERED') as c (c.serviceId)}
 															<option value={c.serviceId}>{c.service.name}</option>
 														{/each}
 													</select>
@@ -1243,7 +1234,7 @@
 														</tr>
 													</thead>
 													<tbody>
-														{#each selectedRoom.meterReadings as read}
+														{#each selectedRoom.meterReadings as read (read.id)}
 															{@const sName =
 																selectedRoom.services.find((s) => s.serviceId === read.serviceId)
 																	?.service.name || 'Dịch vụ'}
@@ -1371,7 +1362,7 @@
 											</p>
 										{:else}
 											<div class="divide-y divide-zinc-200">
-												{#each selectedRoom.assets as asset}
+												{#each selectedRoom.assets as asset (asset.id)}
 													<div
 														class="flex items-center justify-between py-2.5 text-xs font-semibold"
 													>

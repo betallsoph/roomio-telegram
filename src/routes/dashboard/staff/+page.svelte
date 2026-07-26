@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
@@ -59,8 +60,8 @@
 			const data = await res.json();
 			if (res.ok) staffList = data;
 			else toast.error(data.error || 'Lỗi khi tải danh sách nhân viên');
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách nhân viên: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách nhân viên: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -115,8 +116,8 @@
 			toast.success(isEdit ? 'Đã cập nhật nhân viên' : `Đã tạo tài khoản cho nhân viên ${name}`);
 			isDialogOpen = false;
 			if (landlordId) fetchStaff(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -133,8 +134,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi cập nhật trạng thái');
 			toast.success(staff.user.isActive ? 'Đã khóa tài khoản nhân viên' : 'Đã mở khóa nhân viên');
 			if (landlordId) fetchStaff(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -154,8 +155,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi khi xóa nhân viên');
 			toast.success('Đã xóa nhân viên');
 			if (landlordId) fetchStaff(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 </script>
@@ -210,7 +211,7 @@
 		<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
 			<!-- Mobile card list -->
 			<div class="divide-y-2 divide-black bg-white sm:hidden">
-				{#each staffList as staff}
+				{#each staffList as staff (staff.id)}
 					<div class="space-y-2 p-4">
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">
@@ -265,7 +266,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each staffList as staff}
+						{#each staffList as staff (staff.id)}
 							<tr
 								class="border-b border-black/15 font-semibold text-black transition-all hover:bg-slate-50"
 							>
@@ -336,6 +337,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<div
 					class="flex shrink-0 items-center gap-2 border-b-2 border-black bg-zinc-50 px-4 py-3 select-none"

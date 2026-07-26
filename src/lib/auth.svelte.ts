@@ -11,7 +11,7 @@ export const authState = $state({
 	errorType: ''
 });
 
-export function setAuthUser(userData: any) {
+export function setAuthUser(userData: NonNullable<typeof authState.user>) {
 	authState.user = userData;
 	authState.isAuthenticated = true;
 	authState.isError = false;

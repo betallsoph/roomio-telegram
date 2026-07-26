@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
@@ -77,8 +78,8 @@
 			const res = await fetch(url);
 			const data = await res.json();
 			if (res.ok) invoices = data;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách hóa đơn: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách hóa đơn: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -102,8 +103,8 @@
 			isDetailOpen = false;
 			selectedInvoice = null;
 			if (landlordId) fetchInvoices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isConfirming = false;
 		}
@@ -133,8 +134,8 @@
 			isDetailOpen = false;
 			selectedInvoice = null;
 			if (landlordId) fetchInvoices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isDeleting = false;
 		}
@@ -166,8 +167,8 @@
 			toast.success(`Đã xóa ${data.count} hóa đơn`);
 			selectedInvoiceIds = [];
 			if (landlordId) fetchInvoices(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isDeleting = false;
 		}
@@ -291,7 +292,7 @@
 		<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
 			<!-- Mobile: card list -->
 			<div class="divide-y-2 divide-black sm:hidden">
-				{#each filteredInvoices() as invoice}
+				{#each filteredInvoices() as invoice (invoice.id)}
 					<div class="space-y-2 p-4">
 						<div class="flex items-start justify-between gap-2">
 							<div class="min-w-0">
@@ -356,7 +357,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each filteredInvoices() as invoice}
+						{#each filteredInvoices() as invoice (invoice.id)}
 							<tr
 								class="border-b border-zinc-200 font-semibold text-zinc-600 transition-colors hover:bg-slate-50"
 							>
@@ -435,6 +436,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- macOS Style Header -->
 				<div
@@ -490,7 +492,7 @@
 						<div
 							class="divide-y divide-black/15 overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary"
 						>
-							{#each selectedInvoice.items as item}
+							{#each selectedInvoice.items as item (item.id)}
 								<div class="flex items-center justify-between p-3 text-sm font-semibold">
 									<div>
 										<p class="font-bold text-black">{item.name}</p>

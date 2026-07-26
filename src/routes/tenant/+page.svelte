@@ -1,5 +1,7 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
 	import { METER_PHOTO_ASPECT_RATIO, uploadImage, uploadImageToR2 } from '$lib/upload';
@@ -9,7 +11,9 @@
 		getMeteredServiceConfigs as getMeteredConfigs,
 		getUtilityMeterReadings,
 		isUtilityKhoan,
-		type MeterUtility
+		type MeterReadingRow,
+		type MeterUtility,
+		type RoomServiceConfig
 	} from '$lib/meter-utils';
 	import {
 		Home,
@@ -18,10 +22,8 @@
 		MessageSquare,
 		LogOut,
 		Calendar,
-		DollarSign,
 		QrCode,
 		Camera,
-		Check,
 		Loader2,
 		Pin,
 		AlertCircle,
@@ -123,6 +125,40 @@
 		createdAt: string;
 	}
 
+	interface RoomData {
+		id: string;
+		roomNumber: string;
+		monthlyRent: number;
+		propertyId: string;
+		blockId: string | null;
+		property: {
+			name: string;
+			address: string;
+			landlordId: string;
+		};
+		tenant?: {
+			id: string;
+			idNumber?: string;
+			idFrontImage?: string;
+			idBackImage?: string;
+			vehicleImage?: string;
+			checkInImage?: string;
+			moveInDate?: string;
+			deposit?: number;
+			notes?: string;
+		};
+		services?: RoomServiceConfig[];
+		meterReadings: MeterReadingRow[];
+	}
+
+	interface EmptyRoom {
+		id: string;
+		roomNumber: string;
+		roomType: string;
+		area?: number | null;
+		monthlyRent: number;
+	}
+
 	let tenantId = $state<string | null>(null);
 	let tenantName = $state('');
 	let userId = $state(''); // User.id từ Telegram auth state (dùng so sánh người gửi chat)
@@ -155,7 +191,7 @@
 	let uploadingDocField = $state<'front' | 'back' | 'vehicle' | 'checkin' | null>(null);
 
 	// Meter form state
-	let fullRoomData = $state<any | null>(null);
+	let fullRoomData = $state<RoomData | null>(null);
 	let meterServiceId = $state('');
 	let meterMonth = $state(new Date().toISOString().slice(0, 7)); // YYYY-MM
 	let meterPrev = $state<number>(0);
@@ -198,7 +234,7 @@
 
 	// Contract & referral state
 	let activeContract = $state<Contract | null>(null);
-	let emptyRooms = $state<any[]>([]);
+	let emptyRooms = $state<EmptyRoom[]>([]);
 
 	// Chat state
 	let chatMessages = $state<ChatMessage[]>([]);
@@ -210,7 +246,7 @@
 		if (meterServiceId && fullRoomData) {
 			// Chỉ số đầu kỳ tham khảo: lấy theo lần đã được chủ nhà chốt gần nhất
 			const latestApproved = fullRoomData.meterReadings.find(
-				(r: any) => r.serviceId === meterServiceId && r.status === 'approved'
+				(r) => r.serviceId === meterServiceId && r.status === 'approved'
 			);
 			if (latestApproved) {
 				meterPrev = latestApproved.currValue;
@@ -229,8 +265,8 @@
 		if (!file) return null;
 		try {
 			return await uploadImage(file, watermarkLabel);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 			return null;
 		} finally {
 			input.value = '';
@@ -287,8 +323,8 @@
 				meterPhotoUrl = url;
 				void parseMeterPhoto(url);
 			}
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			input.value = '';
 			isUploadingMeterPhoto = false;
@@ -359,9 +395,9 @@
 			meterCurr = '';
 			meterPhotoUrl = '';
 			resetMeterOcrState();
-			fetchTenantData(tenantId);
-		} catch (err: any) {
-			toast.error(err.message);
+			fetchTenantData();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmittingMeter = false;
 		}
@@ -395,9 +431,9 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi cập nhật giấy tờ');
 
 			toast.success('Cập nhật thông tin giấy tờ thành công!');
-			if (tenantId) fetchTenantData(tenantId);
-		} catch (err: any) {
-			toast.error(err.message);
+			if (tenantId) fetchTenantData();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmittingDocs = false;
 		}
@@ -414,7 +450,7 @@
 		tenantName = session.name;
 		userId = session.id;
 
-		fetchTenantData(session.tenantProfileId);
+		fetchTenantData();
 	});
 
 	// Chat: tải tin nhắn & thăm dò mỗi 5 giây khi đang mở tab Chat
@@ -444,7 +480,7 @@
 				chatMessages = data;
 				if (hasNew) scrollChatToBottom();
 			}
-		} catch (e) {
+		} catch {
 			// Ignore lỗi thăm dò
 		}
 	}
@@ -473,45 +509,46 @@
 
 			chatInput = '';
 			await fetchChatMessages();
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSendingChat = false;
 		}
 	}
 
-	async function fetchTenantData(tId: string) {
+	async function fetchTenantData() {
 		isLoading = true;
 		try {
 			// 1. Fetch room details (contains tenant profile & configs & readings)
 			const roomRes = await fetch('/api/rooms');
 			const roomsData = await roomRes.json();
 			if (roomRes.ok && roomsData.length > 0) {
-				fullRoomData = roomsData[0];
+				const room = roomsData[0] as RoomData;
+				fullRoomData = room;
 
 				// Populate roomDetails
 				roomDetails = {
-					roomNumber: fullRoomData.roomNumber,
-					propertyName: fullRoomData.property.name,
-					monthlyRent: fullRoomData.monthlyRent,
-					propertyId: fullRoomData.propertyId
+					roomNumber: room.roomNumber,
+					propertyName: room.property.name,
+					monthlyRent: room.monthlyRent,
+					propertyId: room.propertyId
 				};
 
 				// Populate documents state from room.tenant
-				if (fullRoomData.tenant) {
-					tenantProfileId = fullRoomData.tenant.id;
-					tenantIdNumber = fullRoomData.tenant.idNumber || '';
-					tenantIdFrontImage = fullRoomData.tenant.idFrontImage || '';
-					tenantIdBackImage = fullRoomData.tenant.idBackImage || '';
-					tenantVehicleImage = fullRoomData.tenant.vehicleImage || '';
-					tenantCheckInImage = fullRoomData.tenant.checkInImage || '';
-					tenantMoveInDate = fullRoomData.tenant.moveInDate || '';
-					tenantDeposit = fullRoomData.tenant.deposit || 0;
-					tenantNotes = fullRoomData.tenant.notes || '';
+				if (room.tenant) {
+					tenantProfileId = room.tenant.id;
+					tenantIdNumber = room.tenant.idNumber || '';
+					tenantIdFrontImage = room.tenant.idFrontImage || '';
+					tenantIdBackImage = room.tenant.idBackImage || '';
+					tenantVehicleImage = room.tenant.vehicleImage || '';
+					tenantCheckInImage = room.tenant.checkInImage || '';
+					tenantMoveInDate = room.tenant.moveInDate || '';
+					tenantDeposit = room.tenant.deposit || 0;
+					tenantNotes = room.tenant.notes || '';
 				}
 
 				// Fetch announcements (đủ phạm vi: tòa nhà / block / phòng / đích danh khách)
-				fetchAnnouncements(fullRoomData.propertyId, fullRoomData.blockId, fullRoomData.id);
+				fetchAnnouncements(room.propertyId, room.blockId, room.id);
 			}
 
 			// 2. Fetch invoices
@@ -532,8 +569,8 @@
 					fetchAnnouncements(firstInv.room.property.id);
 				}
 			}
-		} catch (e: any) {
-			toast.error('Lỗi khi tải thông tin: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải thông tin: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -545,7 +582,7 @@
 		roomId?: string | null
 	) {
 		try {
-			const params = new URLSearchParams({ audience: 'tenant' });
+			const params = new SvelteURLSearchParams({ audience: 'tenant' });
 			if (propertyId) params.set('propertyId', propertyId);
 			if (blockId) params.set('blockId', blockId);
 			if (roomId) params.set('roomId', roomId);
@@ -553,17 +590,7 @@
 			const res = await fetch(`/api/announcements?${params.toString()}`);
 			const data = await res.json();
 			if (res.ok) announcements = data.slice(0, 3);
-		} catch (e) {
-			// Ignore
-		}
-	}
-
-	async function fetchEmptyRooms(propertyId: string) {
-		try {
-			const res = await fetch(`/api/rooms?propertyId=${propertyId}&status=empty`);
-			const data = await res.json();
-			if (res.ok) emptyRooms = data;
-		} catch (e) {
+		} catch {
 			// Ignore
 		}
 	}
@@ -591,9 +618,9 @@
 				payosQrCode: linkData.qrCode,
 				payosStatus: linkData.status
 			};
-		} catch (e) {
+		} catch (err: unknown) {
 			payingInvoice = payingInvoice || invoice;
-			paymentLinkError = e instanceof Error ? e.message : 'Không tạo được link thanh toán PayOS';
+			paymentLinkError = getErrorMessage(err, 'Không tạo được link thanh toán PayOS');
 		} finally {
 			isCreatingPaymentLink = false;
 		}
@@ -625,9 +652,9 @@
 			toast.success('Đã gửi hóa đơn thanh toán lên hệ thống, đang chờ chủ nhà xác nhận!');
 			payingInvoice = null;
 			proofImageUrl = '';
-			if (tenantId) fetchTenantData(tenantId);
-		} catch (err: any) {
-			toast.error(err.message);
+			if (tenantId) fetchTenantData();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmittingProof = false;
 		}
@@ -667,9 +694,9 @@
 			reqImage = '';
 			reqIsImportant = false;
 
-			fetchTenantData(tenantId);
-		} catch (err: any) {
-			toast.error(err.message);
+			fetchTenantData();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmittingRequest = false;
 		}
@@ -699,9 +726,9 @@
 
 			toast.success('Đã gửi lời nhắn lưu ý tới chủ trọ thành công!');
 			noteText = '';
-			fetchTenantData(tenantId);
-		} catch (err: any) {
-			toast.error(err.message);
+			fetchTenantData();
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmittingNote = false;
 		}
@@ -714,7 +741,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ action: 'logout' })
 			});
-		} catch (e) {
+		} catch {
 			// Vẫn cho đăng xuất phía client nếu server lỗi
 		}
 		clearAuth();
@@ -790,7 +817,7 @@
 
 		const lines = [
 			`Nhà mình đang ở "${fullRoomData.property.name}" (${fullRoomData.property.address}) còn phòng trống, bạn nào cần thuê thì tham khảo nhé:`,
-			...emptyRooms.map((r: any) => {
+			...emptyRooms.map((r) => {
 				const area = r.area ? `, ${r.area}m2` : '';
 				return `- Phòng ${r.roomNumber} (${getRoomTypeLabel(r.roomType)}${area}): ${formatCurrency(r.monthlyRent)}/tháng`;
 			})
@@ -804,7 +831,7 @@
 		try {
 			await navigator.clipboard.writeText(lines.join('\n'));
 			toast.success('Đã sao chép lời giới thiệu, gửi ngay cho bạn bè!');
-		} catch (e) {
+		} catch {
 			toast.error('Không sao chép được, vui lòng thử lại');
 		}
 	}
@@ -877,7 +904,7 @@
 					<div
 						class="divide-y divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white"
 					>
-						{#each announcements as ann}
+						{#each announcements as ann (ann.id)}
 							<div class="flex flex-col gap-1 bg-white p-4 transition-colors hover:bg-slate-50">
 								<h4 class="flex items-center gap-2 text-sm font-black text-black">
 									<span
@@ -1041,7 +1068,7 @@
 									</button>
 								</div>
 								<div class="divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white">
-									{#each getRecentInvoices() as invoice}
+									{#each getRecentInvoices() as invoice (invoice.id)}
 										<button
 											type="button"
 											onclick={() => {
@@ -1198,7 +1225,7 @@
 								</p>
 							{:else}
 								<div class="divide-y divide-zinc-100">
-									{#each invoices as invoice}
+									{#each invoices as invoice (invoice.id)}
 										<div
 											class="flex flex-col justify-between gap-4 p-4 md:flex-row md:items-center"
 										>
@@ -1222,7 +1249,7 @@
 
 												<!-- Mini items list details -->
 												<div class="mt-2 space-y-1 text-xs font-semibold text-zinc-600">
-													{#each invoice.items as item}
+													{#each invoice.items as item (item.id)}
 														<p>• {item.name}: {formatCurrency(item.amount)}</p>
 													{/each}
 												</div>
@@ -1381,7 +1408,7 @@
 								</p>
 							{:else}
 								<div class="divide-y divide-zinc-100">
-									{#each requests as req}
+									{#each requests as req (req.id)}
 										<div class="space-y-2 p-4 transition-colors hover:bg-slate-50">
 											<div class="flex items-start justify-between">
 												<div>
@@ -1473,7 +1500,7 @@
 												class="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-black focus:outline-none"
 											>
 												<option value="">-- Chọn dịch vụ --</option>
-												{#each getMeteredServiceConfigs() as c}
+												{#each getMeteredServiceConfigs() as c (c.serviceId)}
 													<option value={c.serviceId}>{c.service.name}</option>
 												{/each}
 											</select>
@@ -1642,7 +1669,7 @@
 								</p>
 							{:else}
 								<div class="space-y-2">
-									{#each getHistoryReadings(historyMeterTab) as read}
+									{#each getHistoryReadings(historyMeterTab) as read (`${read.serviceId}-${read.month}-${read.recordedAt}`)}
 										{@const badge = getMeterStatusBadge(read.status)}
 										<div class="rounded-xl border border-zinc-200 bg-white p-4 text-sm">
 											<div class="flex items-start justify-between gap-3">
@@ -1820,7 +1847,7 @@
 								</p>
 							{:else}
 								<div class="divide-y divide-zinc-100">
-									{#each emptyRooms as room}
+									{#each emptyRooms as room (room.id)}
 										<div class="flex items-center justify-between gap-3 py-3">
 											<div>
 												<p class="text-sm font-black text-black">Phòng {room.roomNumber}</p>
@@ -2075,7 +2102,7 @@
 								</p>
 							{:else}
 								<div class="divide-y divide-zinc-100">
-									{#each notes as note}
+									{#each notes as note (note.id)}
 										<div class="space-y-2 py-4">
 											<div class="flex items-center justify-between text-xs">
 												<span class="font-bold text-zinc-400"

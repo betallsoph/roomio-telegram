@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -119,8 +120,8 @@
 					data[0] ??
 					null)
 				: (data[0] ?? null);
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách chủ trọ: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách chủ trọ: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -150,8 +151,8 @@
 
 			toast.success(`Đã ${actionLabel.toLowerCase()} tài khoản chủ trọ`);
 			fetchLandlords();
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -178,8 +179,8 @@
 			toast.success(`Đã cập nhật gói dịch vụ cho ${selectedLandlord.user.name}`);
 			isEditOpen = false;
 			fetchLandlords();
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSaving = false;
 		}
@@ -246,8 +247,8 @@
 			await fetchLandlords();
 			const created = landlords.find((landlord) => landlord.id === data.id);
 			if (created) selectedLandlord = created;
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isCreating = false;
 		}
@@ -428,7 +429,7 @@
 			<div
 				class="grid grid-cols-4 gap-1 rounded-[6px] border-2 border-black bg-white p-1 text-xs font-black"
 			>
-				{#each ['all', 'FREE', 'PREMIUM', 'ENTERPRISE'] as plan}
+				{#each ['all', 'FREE', 'PREMIUM', 'ENTERPRISE'] as plan (plan)}
 					<button
 						onclick={() => (planFilter = plan)}
 						class="rounded-[5px] px-3 py-2 transition-colors {planFilter === plan
@@ -443,7 +444,7 @@
 			<div
 				class="grid grid-cols-4 gap-1 rounded-[6px] border-2 border-black bg-white p-1 text-xs font-black"
 			>
-				{#each [{ value: 'all', label: 'Tất cả' }, { value: 'active', label: 'Đang chạy' }, { value: 'locked', label: 'Đã khóa' }, { value: 'expired', label: 'Hết hạn' }] as status}
+				{#each [{ value: 'all', label: 'Tất cả' }, { value: 'active', label: 'Đang chạy' }, { value: 'locked', label: 'Đã khóa' }, { value: 'expired', label: 'Hết hạn' }] as status (status.value)}
 					<button
 						onclick={() => (statusFilter = status.value)}
 						class="rounded-[5px] px-3 py-2 transition-colors {statusFilter === status.value
@@ -478,7 +479,7 @@
 								<span>Chưa thu</span>
 								<span>Trạng thái</span>
 							</div>
-							{#each filteredLandlords() as landlord}
+							{#each filteredLandlords() as landlord (landlord.id)}
 								<button
 									onclick={() => (selectedLandlord = landlord)}
 									class="grid min-w-[680px] grid-cols-[minmax(220px,1.4fr)_120px_100px_120px_120px] items-center gap-0 border-t-2 border-black px-4 py-3 text-left text-sm font-bold transition-colors hover:bg-blue-50 {selectedLandlord?.id ===
@@ -619,7 +620,7 @@
 										</p>
 									{:else}
 										<div class="max-h-36 overflow-y-auto pr-1">
-											{#each selectedLandlord.properties as property}
+											{#each selectedLandlord.properties as property (property.id)}
 												<div
 													class="flex items-center justify-between gap-3 border-t border-zinc-200 py-2 text-xs font-bold first:border-t-0"
 												>
@@ -696,7 +697,7 @@
 					<div class="space-y-2">
 						<p class="block text-xs font-bold text-zinc-600">Loại hình được dùng</p>
 						<div class="grid grid-cols-2 gap-2">
-							{#each RENTAL_TYPE_OPTIONS as option}
+							{#each RENTAL_TYPE_OPTIONS as option (option.value)}
 								<button
 									type="button"
 									onclick={() => toggleEditRentalType(option.value)}
@@ -868,7 +869,7 @@
 					<div class="space-y-2">
 						<p class="block text-xs font-bold text-zinc-600">Loại hình được dùng</p>
 						<div class="grid grid-cols-2 gap-2">
-							{#each RENTAL_TYPE_OPTIONS as option}
+							{#each RENTAL_TYPE_OPTIONS as option (option.value)}
 								<button
 									type="button"
 									onclick={() => toggleCreateRentalType(option.value)}

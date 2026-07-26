@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
@@ -6,14 +7,12 @@
 		Bell,
 		Plus,
 		X,
-		Check,
 		Trash2,
 		Loader2,
 		MessageSquare,
 		AlertCircle,
 		Pin,
 		Calendar,
-		Home,
 		CheckCircle2
 	} from '@lucide/svelte';
 
@@ -87,8 +86,6 @@
 	let noteContent = $state('');
 	let isSendingNote = $state(false);
 
-	const selectedProperty = $derived(properties.find((p) => p.id === annPropertyId));
-
 	async function fetchRoomOptions(propertyId: string) {
 		roomOptions = [];
 		if (!propertyId) return;
@@ -130,8 +127,8 @@
 			noteContent = '';
 			noteTenantId = '';
 			if (landlordId) fetchNotes(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSendingNote = false;
 		}
@@ -156,8 +153,8 @@
 			const res = await fetch(`/api/notifications?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) notes = data;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải lời nhắn của khách: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải lời nhắn của khách: ' + getErrorMessage(e));
 		} finally {
 			isLoadingNotes = false;
 		}
@@ -169,8 +166,8 @@
 			const res = await fetch(`/api/announcements?senderId=${sId}`);
 			const data = await res.json();
 			if (res.ok) announcements = data;
-		} catch (e: any) {
-			toast.error('Lỗi tải bảng tin thông báo: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi tải bảng tin thông báo: ' + getErrorMessage(e));
 		} finally {
 			isLoadingAnnouncements = false;
 		}
@@ -181,7 +178,7 @@
 			const res = await fetch(`/api/properties?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) properties = data;
-		} catch (e) {
+		} catch {
 			// Ignore
 		}
 	}
@@ -199,8 +196,8 @@
 
 			toast.success('Đã đánh dấu đã đọc lời nhắn');
 			if (landlordId) fetchNotes(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -242,8 +239,8 @@
 			annTargetId = '';
 
 			fetchAnnouncements(userId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -270,8 +267,8 @@
 
 			toast.success('Đã xóa thông báo thành công');
 			if (userId) fetchAnnouncements(userId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 </script>
@@ -326,7 +323,7 @@
 				</div>
 			{:else}
 				<div class="flex-grow divide-y-2 divide-black overflow-y-auto bg-white">
-					{#each notes as note}
+					{#each notes as note (note.id)}
 						{@const roomNum = note.tenant.rooms[0]?.roomNumber || '--'}
 						<div
 							class="relative flex flex-col gap-3 p-4 font-semibold text-black transition-all hover:bg-slate-50"
@@ -402,7 +399,7 @@
 				</div>
 			{:else}
 				<div class="flex-grow divide-y-2 divide-black overflow-y-auto bg-white">
-					{#each announcements as ann}
+					{#each announcements as ann (ann.id)}
 						<div class="flex flex-col gap-2 p-4 font-semibold transition-all hover:bg-slate-50">
 							<div class="flex items-start justify-between gap-3">
 								<div class="flex min-w-0 items-center gap-2">
@@ -453,6 +450,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Windows Header style -->
 				<div
@@ -530,7 +528,7 @@
 									class="w-full rounded-lg border-2 border-black bg-white px-2 py-1.5 font-semibold text-black focus:outline-none"
 								>
 									<option value="">-- Chọn tòa nhà --</option>
-									{#each properties as prop}
+									{#each properties as prop (prop.id)}
 										<option value={prop.id}>{prop.name}</option>
 									{/each}
 								</select>
@@ -547,8 +545,8 @@
 									class="w-full rounded-lg border-2 border-black bg-white px-2 py-1.5 font-semibold text-black focus:outline-none"
 								>
 									<option value="">-- Chọn block --</option>
-									{#each properties as prop}
-										{#each prop.blocks || [] as block}
+									{#each properties as prop (prop.id)}
+										{#each prop.blocks || [] as block (block.id)}
 											<option value={block.id}>{prop.name} / {block.name}</option>
 										{/each}
 									{/each}
@@ -567,7 +565,7 @@
 										class="w-1/2 rounded-lg border-2 border-black bg-white px-2 py-1.5 font-semibold text-black focus:outline-none"
 									>
 										<option value="">-- Tòa --</option>
-										{#each properties as prop}
+										{#each properties as prop (prop.id)}
 											<option value={prop.id}>{prop.name}</option>
 										{/each}
 									</select>
@@ -577,7 +575,7 @@
 										class="w-1/2 rounded-lg border-2 border-black bg-white px-2 py-1.5 font-semibold text-black focus:outline-none"
 									>
 										<option value="">-- Phòng --</option>
-										{#each roomOptions as room}
+										{#each roomOptions as room (room.id)}
 											<option value={room.id}>P.{room.roomNumber}</option>
 										{/each}
 									</select>
@@ -595,7 +593,7 @@
 									class="w-full rounded-lg border-2 border-black bg-white px-2 py-1.5 font-semibold text-black focus:outline-none"
 								>
 									<option value="">-- Chọn khách --</option>
-									{#each tenantOptions as tenant}
+									{#each tenantOptions as tenant (tenant.id)}
 										<option value={tenant.id}
 											>{tenant.user.name} (P.{tenant.rooms[0]?.roomNumber || '--'})</option
 										>
@@ -667,7 +665,7 @@
 						class="w-full rounded-lg border-2 border-black bg-white px-2 py-2 text-sm font-semibold text-black focus:outline-none"
 					>
 						<option value="">-- Chọn khách --</option>
-						{#each tenantOptions as tenant}
+						{#each tenantOptions as tenant (tenant.id)}
 							<option value={tenant.id}
 								>{tenant.user.name} (P.{tenant.rooms[0]?.roomNumber || '--'})</option
 							>

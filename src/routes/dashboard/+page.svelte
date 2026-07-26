@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -125,7 +126,9 @@
 			const reqData = await reqRes.json();
 			if (reqRes.ok) {
 				pendingRequests = reqData
-					.filter((r: any) => r.status !== 'completed' && r.status !== 'rejected')
+					.filter(
+						(r: Record<string, unknown>) => r.status !== 'completed' && r.status !== 'rejected'
+					)
 					.slice(0, 5);
 			}
 
@@ -133,8 +136,8 @@
 			const inboxRes = await fetch('/api/inbox');
 			const inboxData = await inboxRes.json();
 			if (inboxRes.ok) inbox = inboxData;
-		} catch (err: any) {
-			toast.error('Không thể tải dữ liệu báo cáo: ' + err.message);
+		} catch (err: unknown) {
+			toast.error('Không thể tải dữ liệu báo cáo: ' + getErrorMessage(err));
 		} finally {
 			isLoading = false;
 		}
@@ -159,8 +162,8 @@
 			toast.success(`Đã xác nhận thanh toán hóa đơn ${invoiceId}`);
 			// Refresh
 			if (landlordId) fetchDashboardData(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			processingInvoiceId = null;
 		}
@@ -308,7 +311,7 @@
 					</div>
 				{:else}
 					<div class="grid gap-2 p-2 md:grid-cols-2">
-						{#each inbox.items.slice(0, 8) as item}
+						{#each inbox.items.slice(0, 8) as item (item.id)}
 							<a href={item.href} class="block rounded-lg p-4 transition-colors hover:bg-zinc-50">
 								<div class="flex items-start justify-between gap-3">
 									<div class="min-w-0">
@@ -362,7 +365,7 @@
 				{:else}
 					<!-- Mobile: card list view -->
 					<div class="bg-white sm:hidden">
-						{#each unpaidInvoices as invoice}
+						{#each unpaidInvoices as invoice (invoice.id)}
 							<div class="space-y-2 p-4">
 								<div class="flex items-start justify-between gap-2">
 									<div class="min-w-0">
@@ -412,7 +415,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each unpaidInvoices as invoice}
+								{#each unpaidInvoices as invoice (invoice.id)}
 									<tr class="font-semibold transition-all hover:bg-slate-50">
 										<td class="px-4 py-4 font-black text-black">
 											{invoice.room.property.shortName} - {invoice.roomNumber}
@@ -485,7 +488,7 @@
 					</div>
 				{:else}
 					<div class="flex-1 overflow-y-auto bg-white">
-						{#each pendingRequests as req}
+						{#each pendingRequests as req (req.id)}
 							<div class="flex flex-col gap-2 p-4 font-semibold transition-all hover:bg-slate-50">
 								<div class="flex items-start justify-between gap-3">
 									<div>

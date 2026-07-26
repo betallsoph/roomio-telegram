@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import {
@@ -82,8 +83,8 @@
 			if (!res.ok) throw new Error(data.error || 'Không tải được automation');
 			jobs = data.jobs;
 			queuedNotifications = data.queuedNotifications;
-		} catch (error: any) {
-			toast.error(error.message);
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error));
 		} finally {
 			isLoading = false;
 		}
@@ -102,8 +103,8 @@
 			if (!res.ok) throw new Error(data.error || 'Không chạy được automation');
 			toast.success(`Đã chạy ${data.jobs.length} job`);
 			await loadAutomation();
-		} catch (error: any) {
-			toast.error(error.message);
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error));
 		} finally {
 			isRunning = null;
 		}
@@ -151,7 +152,7 @@
 	</div>
 
 	<div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
-		{#each actions as action}
+		{#each actions as action (action.id)}
 			{@const Icon = action.icon}
 			<button
 				onclick={() => runAutomation(action.id)}
@@ -184,7 +185,7 @@
 					<CheckCircle2 class="h-5 w-5 text-green-600" />
 				</div>
 				<div class="divide-y divide-black/15">
-					{#each jobs as job}
+					{#each jobs as job (job.id)}
 						<div class="p-4 text-xs font-bold text-zinc-700">
 							<div class="flex items-center justify-between gap-3">
 								<span class="font-black text-black">{job.type}</span>
@@ -211,7 +212,7 @@
 					<Send class="h-5 w-5 text-blue-500" />
 				</div>
 				<div class="max-h-[520px] divide-y divide-black/15 overflow-y-auto">
-					{#each queuedNotifications as item}
+					{#each queuedNotifications as item (item.id)}
 						<div class="p-4">
 							<div class="flex items-center justify-between gap-3">
 								<h3 class="text-sm font-black text-black">{item.title}</h3>

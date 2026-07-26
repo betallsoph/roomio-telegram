@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -88,7 +89,7 @@
 			landlordId = session.staffLandlordId;
 			staffName = session.name;
 			loadAll();
-		} catch (e) {
+		} catch {
 			localStorage.removeItem('roomio_user');
 			goto('/login');
 		}
@@ -106,7 +107,7 @@
 			const res = await fetch(`/api/requests?staffId=${staffId}`);
 			const data = await res.json();
 			if (res.ok) requests = data;
-		} catch (e) {
+		} catch {
 			// bỏ qua
 		}
 	}
@@ -117,7 +118,7 @@
 			const res = await fetch(`/api/meter-readings?landlordId=${landlordId}&status=pending`);
 			const data = await res.json();
 			if (res.ok) meters = data;
-		} catch (e) {
+		} catch {
 			// bỏ qua
 		}
 	}
@@ -128,7 +129,7 @@
 			const res = await fetch(`/api/rooms?landlordId=${landlordId}`);
 			const data = await res.json();
 			if (res.ok) rooms = data;
-		} catch (e) {
+		} catch {
 			// bỏ qua
 		}
 	}
@@ -168,8 +169,8 @@
 			selectedRequest = null;
 			replyText = '';
 			loadRequests();
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -191,8 +192,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi khi duyệt chỉ số');
 			toast.success(action === 'approve' ? 'Đã chốt chỉ số' : 'Đã từ chối chỉ số');
 			loadMeters();
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -317,7 +318,7 @@
 				</div>
 			{:else}
 				<div class="grid gap-4 sm:grid-cols-2">
-					{#each requests as req}
+					{#each requests as req (req.id)}
 						<button
 							onclick={() => window.setTimeout(() => openRequest(req), 200)}
 							class="roomio-card cursor-pointer p-5 text-left transition-all"
@@ -366,7 +367,7 @@
 				</div>
 			{:else}
 				<div class="space-y-3">
-					{#each meters as m}
+					{#each meters as m (m.id)}
 						<div class="roomio-card p-4">
 							<div class="flex flex-wrap items-center justify-between gap-2">
 								<div>
@@ -459,7 +460,7 @@
 								</tr>
 							</thead>
 							<tbody>
-								{#each rooms as room}
+								{#each rooms as room (room.id)}
 									<tr class="border-b border-black/15 font-semibold text-black">
 										<td class="px-4 py-3 font-black">Phòng {room.roomNumber}</td>
 										<td class="px-4 py-3">{room.property?.shortName ?? '—'}</td>
@@ -513,6 +514,7 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
+			tabindex="-1"
 		>
 			<div
 				class="flex shrink-0 items-center gap-2 border-b-2 border-black bg-zinc-50 px-4 py-3 select-none"

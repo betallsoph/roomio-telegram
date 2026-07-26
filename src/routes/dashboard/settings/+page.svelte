@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { Landmark, User, Save, Loader2 } from '@lucide/svelte';
@@ -45,8 +46,8 @@
 				bankBranch = data.bankBranch || '';
 				momoNumber = data.momoNumber || '';
 			}
-		} catch (e: any) {
-			toast.error('Lỗi khi tải cấu hình chủ trọ: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải cấu hình chủ trọ: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -82,8 +83,8 @@
 			if (!res.ok) throw new Error(data.error || 'Lỗi khi cập nhật cấu hình');
 
 			toast.success('Đã lưu cấu hình tài khoản chủ trọ thành công!');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -191,7 +192,7 @@
 							}}
 						>
 							<option value="">-- Chọn ngân hàng --</option>
-							{#each popularBanks as bank}
+							{#each popularBanks as bank (bank.code)}
 								<option value={bank.code}>{bank.name} ({bank.code})</option>
 							{/each}
 						</select>

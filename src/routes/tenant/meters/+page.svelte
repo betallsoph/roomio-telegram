@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import {
 		Camera,
 		CheckCircle2,
@@ -13,9 +14,42 @@
 	import { onMount } from 'svelte';
 	import { authState } from '$lib/auth.svelte';
 	import { METER_PHOTO_ASPECT_RATIO, compressImage, uploadBlobToR2 } from '$lib/upload';
+	import type { MeterReadingRow, RoomServiceConfig } from '$lib/meter-utils';
 
-	let pendingMeters = $state<any[]>([]);
-	let roomData = $state<any>(null);
+	interface MeterService {
+		id: string;
+		name: string;
+		type: string;
+	}
+
+	interface TenantRoomData {
+		id: string;
+		roomNumber: string;
+		services: Array<RoomServiceConfig & { service: MeterService }>;
+		meterReadings: MeterReadingRow[];
+	}
+
+	interface PendingMeter {
+		id: string;
+		serviceName: string;
+		prevValue: number;
+		currValue: string | number;
+		photoUrl: string | null;
+		r2PhotoUrl: string | null;
+		status: string;
+		icon: typeof Zap;
+		color: string;
+		bg: string;
+		unit: string;
+		ocrParsedValue?: number | null;
+		ocrUnavailable?: boolean;
+		isParsingOcr?: boolean;
+		isUploadingPhoto?: boolean;
+		compressedBlob?: Blob;
+	}
+
+	let pendingMeters = $state<PendingMeter[]>([]);
+	let roomData = $state<TenantRoomData | null>(null);
 	let isLoading = $state(true);
 	let activeMeterId = $state<string | null>(null);
 	let isUploading = $state(false);
@@ -81,24 +115,25 @@
 			const rooms = await res.json();
 
 			if (rooms && rooms.length > 0) {
-				roomData = rooms[0];
+				const room = rooms[0] as TenantRoomData;
+				roomData = room;
 
-				const meteredServices = roomData.services.filter((s: any) => s.service.type === 'METERED');
+				const meteredServices = room.services.filter((s) => s.service.type === 'METERED');
 				const currentMonth = new Date().getMonth() + 1;
 				const currentYear = new Date().getFullYear();
 				const monthStr = `${currentYear}-${currentMonth.toString().padStart(2, '0')}`;
 
-				pendingMeters = meteredServices.map((sConfig: any) => {
+				pendingMeters = meteredServices.map((sConfig) => {
 					const service = sConfig.service;
 
-					const history = roomData.meterReadings.filter(
-						(r: any) => r.serviceId === service.id && r.status === 'approved'
+					const history = room.meterReadings.filter(
+						(r) => r.serviceId === service.id && r.status === 'approved'
 					);
 					const latest = history.length > 0 ? history[0] : null;
 					const prevValue = latest ? latest.currValue : 0;
 
-					const thisMonthReading = roomData.meterReadings.find(
-						(r: any) => r.serviceId === service.id && r.month === monthStr
+					const thisMonthReading = room.meterReadings.find(
+						(r) => r.serviceId === service.id && r.month === monthStr
 					);
 
 					let status = 'pending';
@@ -133,6 +168,7 @@
 						prevValue,
 						currValue,
 						photoUrl: null,
+						r2PhotoUrl: null,
 						status
 					};
 				});
@@ -186,10 +222,10 @@
 				}
 
 				void parseMeterPhoto(meterId, finalPhotoUrl);
-			} catch (error: any) {
+			} catch (error: unknown) {
 				const failIdx = pendingMeters.findIndex((m) => m.id === meterId);
 				if (failIdx !== -1) pendingMeters[failIdx].isUploadingPhoto = false;
-				toast.error(error.message || 'Lỗi khi tải ảnh đồng hồ');
+				toast.error(getErrorMessage(error, 'Lỗi khi tải ảnh đồng hồ'));
 				console.error(error);
 			} finally {
 				input.value = '';
@@ -255,9 +291,9 @@
 				pendingMeters[idx].r2PhotoUrl = finalPhotoUrl;
 			}
 			activeMeterId = null;
-		} catch (error: any) {
+		} catch (error: unknown) {
 			console.error('Lỗi chi tiết:', error);
-			toast.error(error.message || 'Có lỗi xảy ra khi gửi dữ liệu', {
+			toast.error(getErrorMessage(error, 'Có lỗi xảy ra khi gửi dữ liệu'), {
 				id: 'upload',
 				duration: 5000
 			});
@@ -266,7 +302,7 @@
 		}
 	}
 
-	function handleMeterClick(meter: any) {
+	function handleMeterClick(meter: PendingMeter) {
 		if (meter.status === 'pending') {
 			activeMeterId = meter.id;
 		}

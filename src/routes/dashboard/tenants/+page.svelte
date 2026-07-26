@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
@@ -24,6 +25,12 @@
 			name: string;
 			shortName: string;
 		};
+	}
+
+	interface ApiRoom {
+		id: string;
+		roomNumber: string;
+		status: string;
 	}
 
 	interface Tenant {
@@ -80,8 +87,8 @@
 			const res = await fetch(`/api/tenants?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) tenants = data;
-		} catch (e: any) {
-			toast.error('Lỗi khi tải danh sách khách: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Lỗi khi tải danh sách khách: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -98,9 +105,9 @@
 					const roomRes = await fetch(`/api/rooms?propertyId=${prop.id}`);
 					const roomData = await roomRes.json();
 					if (roomRes.ok) {
-						roomData
-							.filter((r: any) => r.status === 'empty')
-							.forEach((r: any) => {
+						(roomData as ApiRoom[])
+							.filter((r) => r.status === 'empty')
+							.forEach((r) => {
 								roomsList.push({
 									id: r.id,
 									roomNumber: r.roomNumber,
@@ -117,7 +124,7 @@
 					roomId = emptyRooms[0].id;
 				}
 			}
-		} catch (e) {
+		} catch {
 			// Ignore
 		}
 	}
@@ -171,8 +178,8 @@
 			// Refresh
 			fetchTenants(landlordId);
 			fetchEmptyRooms(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -206,8 +213,8 @@
 				fetchTenants(landlordId);
 				fetchEmptyRooms(landlordId);
 			}
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -284,7 +291,7 @@
 		<div class="overflow-hidden rounded-lg border-2 border-black bg-white shadow-secondary">
 			<!-- Mobile card list -->
 			<div class="divide-y-2 divide-black bg-white sm:hidden">
-				{#each tenants as tenant}
+				{#each tenants as tenant (tenant.id)}
 					{@const activeRoom = tenant.rooms[0]}
 					<div class="space-y-2 p-4">
 						<div class="flex items-start justify-between gap-2">
@@ -333,7 +340,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each tenants as tenant}
+						{#each tenants as tenant (tenant.id)}
 							{@const activeRoom = tenant.rooms[0]}
 							<tr
 								class="border-b border-black/15 font-semibold text-black transition-all hover:bg-slate-50"
@@ -388,6 +395,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Windows Header style -->
 				<div
@@ -502,7 +510,7 @@
 										required
 										class="w-full rounded-lg border-2 border-black bg-white px-2.5 py-1.5 text-xs font-semibold text-black focus:ring-2 focus:ring-blue-300 focus:outline-none"
 									>
-										{#each emptyRooms as room}
+										{#each emptyRooms as room (room.id)}
 											<option value={room.id}>
 												{room.property.shortName} - Phòng {room.roomNumber}
 											</option>
@@ -640,6 +648,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Windows Header style -->
 				<div

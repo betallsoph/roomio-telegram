@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
@@ -152,8 +153,8 @@
 			}
 
 			rooms = roomsData;
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isLoading = false;
 		}
@@ -274,7 +275,7 @@
 						<h2 class="text-lg font-black text-black">Luồng vận hành</h2>
 					</div>
 					<div class="overflow-hidden border-2 border-black">
-						{#each meta().workflows as workflow, index}
+						{#each meta().workflows as workflow, index (index)}
 							<div
 								class="flex items-center gap-3 border-t-2 border-black px-4 py-3 text-sm font-bold first:border-t-0"
 							>
@@ -310,7 +311,7 @@
 								<span>Giá thuê</span>
 								<span>Công nợ</span>
 							</div>
-							{#each rooms as room}
+							{#each rooms as room (room.id)}
 								<a
 									href="/dashboard/rooms?propertyId={property.id}"
 									class="grid min-w-[680px] grid-cols-[120px_minmax(180px,1fr)_120px_140px_120px] items-center border-t-2 border-black px-4 py-3 text-sm font-bold hover:bg-blue-50"
@@ -359,7 +360,7 @@
 				<div class="border-2 border-black bg-white p-4">
 					<h2 class="text-lg font-black text-black">Tính tiền</h2>
 					<div class="mt-3 space-y-2">
-						{#each meta().billing as item}
+						{#each meta().billing as item (item)}
 							<div class="flex items-start gap-2 text-sm font-bold">
 								<ArrowRight class="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
 								<span>{item}</span>

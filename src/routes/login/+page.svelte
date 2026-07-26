@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -59,8 +60,8 @@
 			else if (data.role === 'LANDLORD') goto('/dashboard');
 			else if (data.role === 'STAFF') goto('/staff');
 			else if (data.role === 'TENANT') goto('/tenant');
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isLoading = false;
 		}

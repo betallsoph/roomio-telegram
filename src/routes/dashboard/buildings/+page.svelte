@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { getErrorMessage } from '$lib/error-utils';
 	import { onMount } from 'svelte';
 	import { toast } from 'svelte-sonner';
 	import { confirmPopup } from '$lib/confirm-popup';
@@ -89,8 +90,8 @@
 			const res = await fetch(`/api/properties?landlordId=${profileId}`);
 			const data = await res.json();
 			if (res.ok) properties = data;
-		} catch (e: any) {
-			toast.error('Không thể tải danh sách cơ sở: ' + e.message);
+		} catch (e: unknown) {
+			toast.error('Không thể tải danh sách cơ sở: ' + getErrorMessage(e));
 		} finally {
 			isLoading = false;
 		}
@@ -143,8 +144,8 @@
 			rentalType = enabledRentalTypes[0] ?? 'APARTMENT';
 			// Refresh
 			fetchProperties(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		} finally {
 			isSubmitting = false;
 		}
@@ -174,8 +175,8 @@
 			isDetailDrawerOpen = false;
 			selectedProperty = null;
 			if (landlordId) fetchProperties(landlordId);
-		} catch (err: any) {
-			toast.error(err.message);
+		} catch (err: unknown) {
+			toast.error(getErrorMessage(err));
 		}
 	}
 
@@ -255,7 +256,7 @@
 	{:else}
 		<!-- Mobile card list (hidden on sm+) -->
 		<div class="divide-y-2 divide-black overflow-hidden rounded-lg border-2 border-black sm:hidden">
-			{#each properties as prop}
+			{#each properties as prop (prop.id)}
 				{@const stats = calculatePropertyStats(prop.rooms)}
 				<!-- Inline stat strip -->
 				<div class="space-y-2 p-4">
@@ -311,7 +312,7 @@
 
 		<!-- Desktop grid (hidden on mobile) -->
 		<div class="hidden gap-6 sm:grid md:grid-cols-2">
-			{#each properties as prop}
+			{#each properties as prop (prop.id)}
 				{@const stats = calculatePropertyStats(prop.rooms)}
 				<div
 					onclick={(e) =>
@@ -386,6 +387,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Header Windows macOS style -->
 				<div
@@ -408,7 +410,7 @@
 						<div class="space-y-2">
 							<p class="text-xs font-bold text-zinc-600">Loại hình</p>
 							<div class="grid grid-cols-2 gap-2">
-								{#each RENTAL_TYPE_OPTIONS.filter( (option) => enabledRentalTypes.includes(option.value) ) as option}
+								{#each RENTAL_TYPE_OPTIONS.filter( (option) => enabledRentalTypes.includes(option.value) ) as option (option.value)}
 									<button
 										type="button"
 										onclick={() => (rentalType = option.value)}
@@ -521,6 +523,7 @@
 				onclick={(e) => e.stopPropagation()}
 				onkeydown={(e) => e.stopPropagation()}
 				role="dialog"
+				tabindex="-1"
 			>
 				<!-- Header Windows macOS style -->
 				<div
@@ -591,7 +594,7 @@
 								{blockLabel(selectedProperty.rentalType)} ({selectedProperty.blocks.length})
 							</h4>
 							<div class="flex flex-wrap gap-2">
-								{#each selectedProperty.blocks as block}
+								{#each selectedProperty.blocks as block (block.id)}
 									<span
 										class="rounded-lg border border-black bg-white px-3 py-1.5 text-xs font-bold text-black shadow-secondary"
 									>
@@ -608,7 +611,7 @@
 						<div
 							class="divide-y divide-black/15 border-t border-b border-black/15 font-semibold text-black"
 						>
-							{#each ['standard', 'master', 'balcony'] as type}
+							{#each ['standard', 'master', 'balcony'] as type (type)}
 								{@const typeRooms = selectedProperty.rooms.filter((r) => r.roomType === type)}
 								{@const typeStats = calculatePropertyStats(typeRooms)}
 								<div class="flex items-center justify-between py-2.5 text-sm">

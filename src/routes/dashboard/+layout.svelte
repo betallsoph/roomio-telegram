@@ -126,13 +126,13 @@
 				</div>
 
 				<nav class="space-y-6">
-					{#each menuGroups as group}
+					{#each menuGroups as group (group.label)}
 						<div>
 							<p class="mb-2 px-2 text-xs font-bold text-zinc-400">
 								{group.label}
 							</p>
 							<div class="space-y-1">
-								{#each group.items as item}
+								{#each group.items as item (item.path)}
 									{@const Icon = item.icon}
 									<a
 										href={item.path}
@@ -216,13 +216,13 @@
 				</div>
 
 				<nav class="space-y-6">
-					{#each menuGroups as group}
+					{#each menuGroups as group (group.label)}
 						<div>
 							<p class="mb-2 px-2 text-xs font-bold text-zinc-400">
 								{group.label}
 							</p>
 							<div class="space-y-1">
-								{#each group.items as item}
+								{#each group.items as item (item.path)}
 									{@const Icon = item.icon}
 									<a
 										href={item.path}

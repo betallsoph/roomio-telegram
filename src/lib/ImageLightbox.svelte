@@ -20,7 +20,6 @@
 <svelte:window onkeydown={(e) => src && e.key === 'Escape' && onClose()} />
 
 {#if src}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
 		onclick={onClose}
@@ -32,9 +31,9 @@
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
+			tabindex="-1"
 			aria-modal="true"
 			aria-label={alt}
-			tabindex="-1"
 		>
 			<button
 				type="button"
