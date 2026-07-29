@@ -6,6 +6,7 @@
 	import { toast } from 'svelte-sonner';
 	import { METER_PHOTO_ASPECT_RATIO, uploadImage, uploadImageToR2 } from '$lib/upload';
 	import { authState, clearAuth, setAuthError } from '$lib/auth.svelte';
+	import { canRenderTenantContent, parseRole } from '$lib/route-policy';
 	import ImageLightbox from '$lib/ImageLightbox.svelte';
 	import {
 		getMeteredServiceConfigs as getMeteredConfigs,
@@ -441,7 +442,8 @@
 
 	onMount(() => {
 		const session = authState.user;
-		if (!session || session.role !== 'TENANT' || !session.tenantProfileId) {
+		// Lớp phòng thủ thứ hai: root layout đã chặn non-tenant trước khi render.
+		if (!canRenderTenantContent(parseRole(session?.role)) || !session?.tenantProfileId) {
 			toast.error('Bạn không có quyền truy cập cổng khách thuê');
 			isLoading = false;
 			return;

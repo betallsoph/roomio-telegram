@@ -1,11 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
-
-	onMount(() => {
-		// Trang chính của Mini App là cổng khách thuê; bot có thể deep-link riêng tới /tenant/meters.
-		goto('/tenant', { replaceState: true });
-	});
+	// UX-001: điều hướng về cổng khách thuê đã chuyển sang `+layout.ts` (`resolveRouteAccess`).
+	// Làm trong `load` thay vì `onMount` để không render một khung hình nào trước khi chuyển;
+	// bot vẫn deep-link thẳng được tới /tenant/meters. Đây chỉ còn là màn chờ.
 </script>
 
 <div class="flex h-screen items-center justify-center bg-gray-50">

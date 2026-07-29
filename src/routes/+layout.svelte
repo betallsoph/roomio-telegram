@@ -5,9 +5,14 @@
 	import { onMount } from 'svelte';
 	import { retrieveLaunchParams, retrieveRawInitData } from '@tma.js/sdk-svelte';
 	import { authState, setAuthUser, setAuthError } from '$lib/auth.svelte';
+	import { canRenderTenantContent, parseRole } from '$lib/route-policy';
 
 	let { children } = $props();
 	let isInitializing = $state(true);
+
+	// UX-001 — lớp role: Mini App chỉ render nội dung riêng tư cho NGƯỜI THUÊ.
+	// Phiên hợp lệ nhưng không phải tenant (chủ trọ/nhân viên/super admin) vẫn bị chặn.
+	const mayRenderTenantContent = $derived(canRenderTenantContent(parseRole(authState.user?.role)));
 
 	onMount(async () => {
 		try {
@@ -97,6 +102,20 @@
 			{/if}
 		</div>
 	</div>
-{:else if authState.isAuthenticated}
+{:else if authState.isAuthenticated && mayRenderTenantContent}
 	{@render children()}
+{:else if authState.isAuthenticated}
+	<!-- Phiên hợp lệ nhưng không phải người thuê: dừng ở đây, không render nội dung riêng tư. -->
+	<div class="flex min-h-screen items-center justify-center bg-gray-50 px-5">
+		<div
+			class="w-full max-w-sm rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-sm"
+		>
+			<img src="/brand/roomio-wordmark-blue600.png" alt="Roomio" class="mx-auto mb-5 h-auto w-36" />
+			<h2 class="mb-2 text-xl font-bold text-black">Dành riêng cho người thuê</h2>
+			<p class="text-sm text-zinc-500">
+				Mini App này chỉ phục vụ người thuê. Vui lòng dùng trang quản lý trên trình duyệt cho tài
+				khoản chủ trọ, nhân viên hoặc quản trị viên.
+			</p>
+		</div>
+	</div>
 {/if}
